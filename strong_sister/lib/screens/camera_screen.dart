@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:strong_sister/widgets/custom_navigation_bar.dart';
 
 class CameraScreen extends StatefulWidget {
   @override
@@ -15,32 +16,36 @@ class _CameraScreenState extends State<CameraScreen> {
   @override
   void initState() {
     super.initState();
-    _initializeCamera();
+    _requestPermissions();
   }
 
-  Future<void> _initializeCamera() async {
-    PermissionStatus status = await Permission.camera.request();
+  Future<void> _requestPermissions() async {
+    PermissionStatus cameraStatus = await Permission.camera.request();
 
-    if (status.isGranted) {
-      cameras = await availableCameras();
-      if (cameras != null && cameras!.isNotEmpty) {
-        _controller = CameraController(cameras![0], ResolutionPreset.high);
-
-        try {
-          await _controller?.initialize();
-          setState(() {
-            isCameraInitialized = true;
-          });
-        } catch (e) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error initializing camera: $e')),
-          );
-        }
-      }
+    if (cameraStatus.isGranted) {
+      await _initializeCamera();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Camera permission denied')),
       );
+    }
+  }
+
+  Future<void> _initializeCamera() async {
+    cameras = await availableCameras();
+    if (cameras != null && cameras!.isNotEmpty) {
+      _controller = CameraController(cameras![0], ResolutionPreset.high);
+
+      try {
+        await _controller?.initialize();
+        setState(() {
+          isCameraInitialized = true;
+        });
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error initializing camera: $e')),
+        );
+      }
     }
   }
 
@@ -86,6 +91,7 @@ class _CameraScreenState extends State<CameraScreen> {
           : Center(
               child: CircularProgressIndicator(),
             ),
+      bottomNavigationBar: CustomNavigationBar(),
     );
   }
 }
