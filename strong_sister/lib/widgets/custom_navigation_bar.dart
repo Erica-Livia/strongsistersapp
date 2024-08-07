@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../screens/home_page.dart'; 
+import '../screens/home_page.dart';
 import '../screens/ai_chatbot.dart';
 import '../screens/safe_contacts.dart';
 import '../screens/community_screen.dart';
@@ -26,6 +26,24 @@ class _CustomNavigationBarState extends State<CustomNavigationBar> {
     setState(() {
       _selectedIndex = index;
     });
+
+    switch (index) {
+      case 0:
+        Navigator.pushNamed(context, '/home');
+        break;
+      case 1:
+        Navigator.pushNamed(context, '/contacts');
+        break;
+      case 2:
+        Navigator.pushNamed(context, '/aichatbot');
+        break;
+      case 3:
+        Navigator.pushNamed(context, '/community');
+        break;
+      case 4:
+        Navigator.pushNamed(context, '/profile');
+        break;
+    }
   }
 
   @override
