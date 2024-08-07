@@ -60,7 +60,7 @@ class _CameraScreenState extends State<CameraScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Camera'),
-        backgroundColor: Colors.grey,
+        backgroundColor: Colors.grey[200],
       ),
       body: isCameraInitialized
           ? Column(
