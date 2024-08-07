@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:strong_sister/services/openai_service.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:strong_sister/firebase_options.dart';
 import 'package:strong_sister/screens/login.dart';
@@ -10,6 +13,7 @@ import 'package:strong_sister/screens/community_screen.dart';
 import 'package:strong_sister/screens/profile_management.dart';
 
 void main() async {
+  // await dotenv.load(fileName: ".env");
   WidgetsFlutterBinding.ensureInitialized();
   try {
     await Firebase.initializeApp(
@@ -20,7 +24,16 @@ void main() async {
     print("Error initializing Firebase: $e");
     print("Stack trace: $stackTrace");
   }
-  runApp(MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        Provider<OpenAIService>(
+          create: (_) => OpenAIService(dotenv.env['OPENAI_API_KEY']!),
+        ),
+      ],
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
