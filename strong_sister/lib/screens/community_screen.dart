@@ -18,7 +18,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Community'),
-        backgroundColor: Colors.teal,
+        backgroundColor: Colors.grey[200],
       ),
       body: ListView.builder(
         padding: EdgeInsets.all(16),
@@ -28,7 +28,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
             margin: EdgeInsets.symmetric(vertical: 8),
             child: ListTile(
               title: Text(_posts[index]),
-              subtitle: Text("User Name"), // Replace with actual user data
+              subtitle: Text("User Name"),
             ),
           );
         },
