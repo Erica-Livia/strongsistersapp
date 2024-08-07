@@ -11,6 +11,7 @@ import 'package:strong_sister/screens/safe_contacts.dart';
 import 'package:strong_sister/screens/ai_chatbot.dart';
 import 'package:strong_sister/screens/community_screen.dart';
 import 'package:strong_sister/screens/profile_management.dart';
+import 'package:strong_sister/screens/camera_screen.dart';
 
 void main() async {
   // await dotenv.load(fileName: ".env");
@@ -53,6 +54,7 @@ class MyApp extends StatelessWidget {
         '/aichatbot': (context) => AIChatbotScreen(),
         '/community': (context) => CommunityScreen(),
         '/profile': (context) => ProfileScreen(),
+        '/camera': (context) => CameraScreen(),
       },
     );
   }
