@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import '../widgets/custom_navigation_bar.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -42,14 +47,14 @@ class HomeScreen extends StatelessWidget {
                           ),
                           SizedBox(height: 8.0),
                           Text(
-                            "Press shake your phone or click on the emergency button, your live location will be shared with the nearest help centre and your emergency contacts.",
+                            "Press shake your phone or click on the emergency button, your live location will be shared with the nearest help center and your emergency contacts.",
                           ),
                         ],
                       ),
                     ),
                     SizedBox(width: 16.0),
                     Image.asset(
-                      'emergency_image.jpg',
+                      'assets/emergency_image.jpg', // Ensure the image is in the assets directory
                       height: 100.0,
                       width: 100.0,
                     ),
@@ -60,8 +65,7 @@ class HomeScreen extends StatelessWidget {
           ),
           // SOS Button Section
           Container(
-            height: MediaQuery.of(context).size.height *
-                0.25, // Adjust height as needed
+            height: MediaQuery.of(context).size.height * 0.25,
             child: Center(
               child: GestureDetector(
                 onTap: () {
@@ -159,7 +163,7 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
-      bottomNavigationBar: CustomNavigationBar(), // Correctly placed here
+      bottomNavigationBar: CustomNavigationBar(),
     );
   }
 

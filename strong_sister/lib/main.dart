@@ -4,6 +4,10 @@ import 'package:strong_sister/firebase_options.dart';
 import 'package:strong_sister/screens/login.dart';
 import 'package:strong_sister/screens/register.dart';
 import 'package:strong_sister/screens/home_page.dart';
+import 'package:strong_sister/screens/safe_contacts.dart';
+import 'package:strong_sister/screens/ai_chatbot.dart';
+import 'package:strong_sister/screens/community_screen.dart';
+import 'package:strong_sister/screens/profile_management.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,7 +23,6 @@ void main() async {
   runApp(MyApp());
 }
 
-
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -33,6 +36,10 @@ class MyApp extends StatelessWidget {
         '/': (context) => LoginScreen(),
         '/register': (context) => RegisterScreen(),
         '/home': (context) => HomeScreen(),
+        '/contacts': (context) => SafeContactsScreen(),
+        '/aichatbot': (context) => AIChatbotScreen(),
+        '/community': (context) => CommunityScreen(),
+        '/profile': (context) => ProfileScreen(),
       },
     );
   }

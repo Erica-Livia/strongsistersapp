@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import '../screens/home_page.dart'; // Ensure this is correctly importing HomeScreen
-import '../screens/ai_chatbot.dart'; // Adjust paths as necessary
-import '../screens/safe_contacts.dart'; // Adjust paths as necessary
-// import '../screens/feed_screen.dart';
-import '../screens/profile_management.dart'; // Adjust paths as necessary
+import '../screens/home_page.dart'; 
+import '../screens/ai_chatbot.dart';
+import '../screens/safe_contacts.dart';
+import '../screens/community_screen.dart';
+import '../screens/profile_management.dart';
 
 class CustomNavigationBar extends StatefulWidget {
   @override
@@ -16,10 +16,10 @@ class _CustomNavigationBarState extends State<CustomNavigationBar> {
   // List of screens or widgets corresponding to each navigation item
   final List<Widget> _screens = [
     HomeScreen(),
-    // ContactsScreen(),
-    // ChatbotScreen(),
-    // FeedScreen(),
-    // ProfileScreen(),
+    SafeContactsScreen(),
+    AIChatbotScreen(),
+    CommunityScreen(),
+    ProfileScreen(),
   ];
 
   void _onItemTapped(int index) {
