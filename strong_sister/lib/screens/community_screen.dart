@@ -66,7 +66,7 @@ class CommunityScreen extends StatelessWidget {
                             children: [
                               IconButton(
                                 icon: Icon(
-                                  hasLiked ? Icons.thumb_down : Icons.thumb_up,
+                                  hasLiked ? Icons.thumb_up : Icons.thumb_up,
                                   color: hasLiked ? Colors.red : Colors.black,
                                 ),
                                 onPressed: () {
@@ -99,6 +99,8 @@ class CommunityScreen extends StatelessWidget {
 
   void _showCommentsDialog(BuildContext context, String postId) {
     final TextEditingController _commentController = TextEditingController();
+    final String nickname =
+        'ActualNickname'; // Replace with actual nickname retrieval
 
     showDialog(
       context: context,
@@ -150,7 +152,6 @@ class CommunityScreen extends StatelessWidget {
             TextButton(
               onPressed: () {
                 if (_commentController.text.isNotEmpty) {
-                  final nickname = 'Nickname'; // Fetch the actual nickname
                   _postService.addComment(
                       postId, _commentController.text, nickname);
                   _commentController.clear();
