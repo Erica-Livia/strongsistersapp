@@ -138,8 +138,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   SizedBox(height: 16.0),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  Wrap(
+                    spacing: 16.0,
+                    runSpacing: 16.0,
                     children: [
                       _buildEmergencyButton(
                         icon: Icons.report,
@@ -151,6 +152,34 @@ class _HomeScreenState extends State<HomeScreen> {
                       _buildEmergencyButton(
                         icon: Icons.warning_amber_rounded,
                         label: 'Other Incident',
+                        onPressed: () {
+                          // Handle button press
+                        },
+                      ),
+                      _buildEmergencyButton(
+                        icon: Icons.health_and_safety,
+                        label: 'Medical Emergency',
+                        onPressed: () {
+                          // Handle button press
+                        },
+                      ),
+                      _buildEmergencyButton(
+                        icon: Icons.car_crash,
+                        label: 'Car Accident',
+                        onPressed: () {
+                          // Handle button press
+                        },
+                      ),
+                      _buildEmergencyButton(
+                        icon: Icons.fire_truck,
+                        label: 'Fire',
+                        onPressed: () {
+                          // Handle button press
+                        },
+                      ),
+                      _buildEmergencyButton(
+                        icon: Icons.warning,
+                        label: 'Other',
                         onPressed: () {
                           // Handle button press
                         },
