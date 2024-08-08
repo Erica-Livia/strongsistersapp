@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/custom_navigation_bar.dart';
 
+
 class ProfileScreen extends StatefulWidget {
   @override
   _ProfileScreenState createState() => _ProfileScreenState();
@@ -12,7 +13,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Profile'),
-        backgroundColor: Colors.grey[200],
+        backgroundColor: Colors.teal,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context); 
+          },
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.edit),
+            onPressed: () {
+              // Handle edit profile action
+            },
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -31,22 +46,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             SizedBox(height: 30),
 
-            // Logout Button
-            Center(
-              child: ElevatedButton(
-                onPressed: () => _showLogoutWarning(context),
-                child: Text('Logout'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                  textStyle: TextStyle(fontSize: 16),
-                ),
+            // Profile Actions
+            Expanded(
+              child: ListView(
+                children: [
+                  _buildProfileAction(Icons.refresh, 'Available', 'Change Status'),
+                  _buildProfileAction(Icons.location_pin, 'Set Location', ''),
+                  _buildProfileAction(Icons.language, 'App Language', ''),
+                  _buildProfileAction(Icons.help, 'Help', ''),
+                  _buildProfileAction(Icons.logout, 'Logout', ''),
+                ],
               ),
             ),
           ],
         ),
       ),
       bottomNavigationBar: CustomNavigationBar(),
+    );
+  }
+
+  Widget _buildProfileAction(IconData icon, String title, String subtitle) {
+    return ListTile(
+      leading: Icon(icon),
+      title: Text(title),
+      subtitle: subtitle.isNotEmpty ? Text(subtitle) : null,
+      onTap: () {
+        // Handle tap on profile action
+        if (title == 'Logout') {
+          _showLogoutWarning(context);
+        } else {
+          // Handle other actions
+        }
+      },
     );
   }
 

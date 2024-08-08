@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:strong_sister/models/contact.dart'; // Import the Contact class
 import '../widgets/custom_navigation_bar.dart';
+import '../widgets/buildContactList.dart';
 
 class SafeContactsScreen extends StatefulWidget {
   @override
@@ -10,52 +14,121 @@ class SafeContactsScreen extends StatefulWidget {
 
 class _SafeContactsScreenState extends State<SafeContactsScreen> {
   List<Contact> _contacts = [];
-  Contact _newContact = Contact(id: '', name: '', phone: '');
+  Contact _newContact = Contact(id: '', name: '', phone: '', relationship: '');
   bool _isEditing = false;
   int _currentIndex = -1;
 
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _relationshipController = TextEditingController();
 
-  final String _userId = 'user_id';
+  String _userId = '';
 
   @override
   void initState() {
     super.initState();
-    _loadContacts();
+    _authenticateAndLoadContacts();
   }
 
   @override
   void dispose() {
     _nameController.dispose();
     _phoneController.dispose();
+    _relationshipController.dispose();
     super.dispose();
   }
 
+  Future<void> _authenticateAndLoadContacts() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      _userId = user.uid;
+      _loadContacts();
+    } else {
+      // Redirect to login screen if user is not authenticated
+      Navigator.pushReplacementNamed(context, '/');
+    }
+  }
+
   Future<void> _loadContacts() async {
-    final snapshot = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(_userId)
-        .collection('safeContacts')
-        .get();
-    final contacts = snapshot.docs.map((doc) {
-      final data = doc.data();
-      return Contact(
-        id: doc.id,
-        name: data['contactName'] ?? '',
-        phone: data['contactNumber'] ?? '',
-      );
-    }).toList();
-    setState(() {
-      _contacts = contacts;
-    });
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(_userId)
+          .collection('safeContacts')
+          .get();
+      final contacts = snapshot.docs.map((doc) {
+        final data = doc.data();
+        return Contact(
+          id: doc.id,
+          name: data['contactName'] ?? '',
+          phone: data['contactNumber'] ?? '',
+          relationship: data['relationship'] ?? '',
+        );
+      }).toList();
+      setState(() {
+        _contacts = contacts;
+      });
+    } catch (e) {
+      print('Error loading contacts: $e');
+    }
+  }
+
+  Future<void> _addOrUpdateContact() async {
+    try {
+      if (_isEditing) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(_userId)
+            .collection('safeContacts')
+            .doc(_contacts[_currentIndex].id)
+            .update({
+          'contactName': _nameController.text,
+          'contactNumber': _phoneController.text,
+          'relationship': _relationshipController.text,
+        });
+        setState(() {
+          _contacts[_currentIndex] = Contact(
+            id: _contacts[_currentIndex].id,
+            name: _nameController.text,
+            phone: _phoneController.text,
+            relationship: _relationshipController.text,
+          );
+          _isEditing = false;
+          _currentIndex = -1;
+        });
+      } else {
+        final docRef = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(_userId)
+            .collection('safeContacts')
+            .add({
+          'contactName': _nameController.text,
+          'contactNumber': _phoneController.text,
+          'relationship': _relationshipController.text,
+        });
+        setState(() {
+          _contacts.add(Contact(
+            id: docRef.id,
+            name: _nameController.text,
+            phone: _phoneController.text,
+            relationship: _relationshipController.text,
+          ));
+        });
+      }
+      print('Contact added/updated successfully');
+      Navigator.of(context).pop();
+    } catch (e) {
+      print('Error adding/updating contact: $e');
+    }
   }
 
   void _showContactModal() {
-    _newContact = Contact(id: '', name: '', phone: '');
-    _nameController.text = _newContact.name;
-    _phoneController.text = _newContact.phone;
-
+    if (!_isEditing) {
+      _newContact = Contact(id: '', name: '', phone: '', relationship: '');
+      _nameController.clear();
+      _phoneController.clear();
+      _relationshipController.clear();
+    }
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -81,54 +154,26 @@ class _SafeContactsScreenState extends State<SafeContactsScreen> {
                     border: OutlineInputBorder(),
                   ),
                 ),
+                SizedBox(height: 16),
+                TextField(
+                  controller: _relationshipController,
+                  decoration: InputDecoration(
+                    labelText: 'Relationship',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
               ],
             ),
           ),
           actions: [
             TextButton(
               onPressed: () async {
-                if (_isEditing) {
-                  await FirebaseFirestore.instance
-                      .collection('users')
-                      .doc(_userId)
-                      .collection('safeContacts')
-                      .doc(_contacts[_currentIndex].id)
-                      .update({
-                    'contactName': _nameController.text,
-                    'contactNumber': _phoneController.text,
-                  });
-                  setState(() {
-                    _contacts[_currentIndex] = Contact(
-                      id: _contacts[_currentIndex].id,
-                      name: _nameController.text,
-                      phone: _phoneController.text,
-                    );
-                    _isEditing = false;
-                    _currentIndex = -1;
-                  });
-                } else {
-                  final docRef = await FirebaseFirestore.instance
-                      .collection('users')
-                      .doc(_userId)
-                      .collection('safeContacts')
-                      .add({
-                    'contactName': _nameController.text,
-                    'contactNumber': _phoneController.text,
-                  });
-                  setState(() {
-                    _contacts.add(Contact(
-                      id: docRef.id,
-                      name: _nameController.text,
-                      phone: _phoneController.text,
-                    ));
-                  });
-                }
-                _newContact = Contact(id: '', name: '', phone: '');
-                Navigator.of(context).pop();
+                await _addOrUpdateContact();
+                setState(() {});
               },
               child: Text(_isEditing ? 'Update Contact' : 'Add Contact'),
               style: TextButton.styleFrom(
-                foregroundColor: Colors.teal,
+                foregroundColor: Colors.red,
               ),
             ),
             TextButton(
@@ -152,17 +197,37 @@ class _SafeContactsScreenState extends State<SafeContactsScreen> {
       _isEditing = true;
       _currentIndex = index;
     });
+    _nameController.text = _contacts[index].name;
+    _phoneController.text = _contacts[index].phone;
+    _relationshipController.text = _contacts[index].relationship;
     _showContactModal();
   }
 
   void _handleDeleteContact(int index) async {
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(_userId)
-        .collection('safeContacts')
-        .doc(_contacts[index].id)
-        .delete();
-    setState(() => _contacts.removeAt(index));
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(_userId)
+          .collection('safeContacts')
+          .doc(_contacts[index].id)
+          .delete();
+      setState(() => _contacts.removeAt(index));
+      print('Contact deleted successfully');
+    } catch (e) {
+      print('Error deleting contact: $e');
+    }
+  }
+
+  Future<void> _makeCall(String phoneNumber) async {
+    final Uri launchUri = Uri(
+      scheme: 'tel',
+      path: phoneNumber,
+    );
+    try {
+      await launchUrl(launchUri);
+    } catch (e) {
+      print('Error making call: $e');
+    }
   }
 
   @override
@@ -183,9 +248,16 @@ class _SafeContactsScreenState extends State<SafeContactsScreen> {
       ),
       bottomNavigationBar: CustomNavigationBar(),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _showContactModal(),
+        onPressed: () {
+          setState(() {
+            _isEditing = false;
+            _currentIndex = -1;
+            _newContact = Contact(id: '', name: '', phone: '', relationship: '');
+          });
+          _showContactModal();
+        },
         child: Icon(Icons.add),
-        backgroundColor: Colors.teal,
+        backgroundColor: Colors.red,
       ),
     );
   }
@@ -207,10 +279,15 @@ class _SafeContactsScreenState extends State<SafeContactsScreen> {
             '${contact.name}',
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
-          subtitle: Text(contact.phone),
+          subtitle: Text('${contact.phone}\nRelationship: ${contact.relationship}'),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
+              IconButton(
+                icon: Icon(Icons.call),
+                onPressed: () => _makeCall(contact.phone),
+                color: Colors.green,
+              ),
               IconButton(
                 icon: SvgPicture.asset('assets/edit.svg'),
                 onPressed: () => _handleEditContact(index),
@@ -233,12 +310,14 @@ class Contact {
   String id;
   String name;
   String phone;
+  String relationship;
   String? image;
 
   Contact({
     required this.id,
     required this.name,
     required this.phone,
+    required this.relationship,
     this.image,
   });
 }
