@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:strong_sister/models/contact.dart'; // Import the Contact class
 import '../widgets/custom_navigation_bar.dart';
+import '../widgets/buildContactList.dart';
 
 class SafeContactsScreen extends StatefulWidget {
   @override
@@ -170,7 +173,7 @@ class _SafeContactsScreenState extends State<SafeContactsScreen> {
               },
               child: Text(_isEditing ? 'Update Contact' : 'Add Contact'),
               style: TextButton.styleFrom(
-                foregroundColor: Colors.teal,
+                foregroundColor: Colors.red,
               ),
             ),
             TextButton(
@@ -215,6 +218,18 @@ class _SafeContactsScreenState extends State<SafeContactsScreen> {
     }
   }
 
+  Future<void> _makeCall(String phoneNumber) async {
+    final Uri launchUri = Uri(
+      scheme: 'tel',
+      path: phoneNumber,
+    );
+    try {
+      await launchUrl(launchUri);
+    } catch (e) {
+      print('Error making call: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -242,7 +257,7 @@ class _SafeContactsScreenState extends State<SafeContactsScreen> {
           _showContactModal();
         },
         child: Icon(Icons.add),
-        backgroundColor: Colors.teal,
+        backgroundColor: Colors.red,
       ),
     );
   }
@@ -268,6 +283,11 @@ class _SafeContactsScreenState extends State<SafeContactsScreen> {
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
+              IconButton(
+                icon: Icon(Icons.call),
+                onPressed: () => _makeCall(contact.phone),
+                color: Colors.green,
+              ),
               IconButton(
                 icon: SvgPicture.asset('assets/edit.svg'),
                 onPressed: () => _handleEditContact(index),
