@@ -25,7 +25,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   }
 
   Future<void> _checkNickname() async {
-    var userId = 'userId'; // Replace with the actual user ID logic
+    var userId = 'userId';
     var userDoc =
         await FirebaseFirestore.instance.collection('users').doc(userId).get();
     if (userDoc.exists && userDoc.data()!.containsKey('nickname')) {
