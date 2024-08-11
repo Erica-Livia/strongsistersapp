@@ -72,36 +72,36 @@ After installing, you can use the app for the following:
 (Production Still in Progress)
 
 Welcome
-![Welcome Screen](https://drive.google.com/file/d/1eaBv4En03EC_eH1DJdHuwtB7Fos3OnnK/view?usp=sharing)
+[Welcome Screen](https://drive.google.com/file/d/1eaBv4En03EC_eH1DJdHuwtB7Fos3OnnK/view?usp=sharing)
 
 Login
-![Login Screen](https://drive.google.com/file/d/1w7iGqatFTQqpPQfivlkYZoFPr-YDI0iV/view?usp=drive_link)
+[Login Screen](https://drive.google.com/file/d/1w7iGqatFTQqpPQfivlkYZoFPr-YDI0iV/view?usp=drive_link)
 
 Home Page
-![Home Page](https://drive.google.com/file/d/1A13o-b0SgeRNnqdgfP1YKOyBCa_ujxh7/view?usp=drive_link)
+[Home Page](https://drive.google.com/file/d/1A13o-b0SgeRNnqdgfP1YKOyBCa_ujxh7/view?usp=drive_link)
 
 Safe Contacts
-![Safe Contacts](https://drive.google.com/file/d/1uJhlPlhsuzIzrefPG_DwkpCUfan8qxBS/view?usp=drive_link)
+[Safe Contacts](https://drive.google.com/file/d/1uJhlPlhsuzIzrefPG_DwkpCUfan8qxBS/view?usp=drive_link)
 
 AI ChatBot
-![AI ChatBot](https://drive.google.com/file/d/16bdF_c_mVVil0IpWbEyQryIi_6Hh3qMD/view?usp=drive_link)
+[AI ChatBot](https://drive.google.com/file/d/16bdF_c_mVVil0IpWbEyQryIi_6Hh3qMD/view?usp=drive_link)
 
 Community Feed
-![Community Feed](https://drive.google.com/file/d/1yJqexB9LUY920WV5f6VFQJ_fkJih5dmM/view?usp=drive_link)
+[Community Feed](https://drive.google.com/file/d/1yJqexB9LUY920WV5f6VFQJ_fkJih5dmM/view?usp=drive_link)
 
 Profile Management
-![Profile Management](https://drive.google.com/file/d/1iCuKP6zRxAYALOj_BjYCRyTPZ-ls6sSu/view?usp=drive_link)
+[Profile Management](https://drive.google.com/file/d/1iCuKP6zRxAYALOj_BjYCRyTPZ-ls6sSu/view?usp=drive_link)
 
 
 ## Authors
-Erica-Livia Ingabire [LinkedIn](www.linkedin.com/in/erica-livia), [Github](https://github.com/Erica-Livia/)
-Noella Polie Vicia Ishemezwe  [LinkedIn](https://www.linkedin.com/in/ishemezwe-polie-954022211/), [Github](https://github.com/Vicia0)
+Erica-Livia Ingabire [LinkedIn](www.linkedin.com/in/erica-livia), [Github](https://github.com/Erica-Livia/)  
+Noella Polie Vicia Ishemezwe  [LinkedIn](https://www.linkedin.com/in/ishemezwe-polie-954022211/), [Github](https://github.com/Vicia0)  
 
 
 ## Strong Sister Team & Contact
-Erica-Livia Ingabire  [LinkedIn](www.linkedin.com/in/erica-livia)
-Noella Polie Vicia Ishemezwe  [LinkedIn](https://www.linkedin.com/in/ishemezwe-polie-954022211/)
-Nelly Gloria Ndikumana  [LinkedIn](https://www.linkedin.com/in/nelly-gloria-ndikumana-b32331241/)
-Yvette Uwimana  [LinkedIn](https://www.linkedin.com/in/yvetteuwimana/)
+Erica-Livia Ingabire  [LinkedIn](www.linkedin.com/in/erica-livia)  
+Noella Polie Vicia Ishemezwe  [LinkedIn](https://www.linkedin.com/in/ishemezwe-polie-954022211/)  
+Nelly Gloria Ndikumana  [LinkedIn](https://www.linkedin.com/in/nelly-gloria-ndikumana-b32331241/)  
+Yvette Uwimana  [LinkedIn](https://www.linkedin.com/in/yvetteuwimana/)  
 
 
