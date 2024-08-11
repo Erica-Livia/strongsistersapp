@@ -71,26 +71,26 @@ After installing, you can use the app for the following:
 ## Screenshots
 (Production Still in Progress)
 
-Welcome
-<img src="strong_sister/assets/appimages/welcome.png" alt="Welcome Screen" width="400"/>
+Welcome  
+<img src="strong_sister/assets/appimages/welcome.png" alt="Welcome Screen" width="400"/>  
 
-Login
-<img src="strong_sister/assets/appimages/login.png" alt="Login Screen" width="400"/>
+Login  
+<img src="strong_sister/assets/appimages/login.png" alt="Login Screen" width="400"/>  
 
-Home Page
-<img src="strong_sister/assets/appimages/homepage.png" alt="Home Page" width="400"/>
+Home Page  
+<img src="strong_sister/assets/appimages/homepage.png" alt="Home Page" width="400"/>  
 
-Safe Contacts
-<img src="strong_sister/assets/appimages/safecontacts.png" alt="Safe Contacts" width="400"/>
+Safe Contacts  
+<img src="strong_sister/assets/appimages/safecontacts.png" alt="Safe Contacts" width="400"/>  
 
-AI ChatBot
-<img src="strong_sister/assets/appimages/chatbot.png" alt="AI ChatBot" width="400"/>
+AI ChatBot  
+<img src="strong_sister/assets/appimages/chatbot.png" alt="AI ChatBot" width="400"/>  
 
-Community Feed
-<img src="strong_sister/assets/appimages/community.png" alt="Community Feed" width="400"/>
+Community Feed  
+<img src="strong_sister/assets/appimages/community.png" alt="Community Feed" width="400"/>  
 
-Profile Management
-<img src="strong_sister/assets/appimages/profile.png" alt="Profile Management" width="400"/>
+Profile Management  
+<img src="strong_sister/assets/appimages/profile.png" alt="Profile Management" width="400"/>  
 
 
 ## Authors
