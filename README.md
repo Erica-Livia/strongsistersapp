@@ -1,6 +1,6 @@
 # Strong Sister App
 
-[Strong Sister Logo](https://drive.google.com/file/d/1cjc7uKnLyvHMSd3Cdx3afYE1I-sIwrMZ/view?usp=drive_link)  
+![Strong Sister Logo](strong-sister/assets/appimages/logo.jpg)  
 
 ## Table of Contents
 - [Project Overview](#project-overview)
@@ -72,25 +72,25 @@ After installing, you can use the app for the following:
 (Production Still in Progress)
 
 Welcome
-[Welcome Screen](https://drive.google.com/file/d/1eaBv4En03EC_eH1DJdHuwtB7Fos3OnnK/view?usp=sharing)
+![Welcome Screen](strong-sister/assets/appimages/welcome.png)
 
 Login
-[Login Screen](https://drive.google.com/file/d/1w7iGqatFTQqpPQfivlkYZoFPr-YDI0iV/view?usp=drive_link)
+![Login Screen](strong-sister/assets/appimages/login.png)  
 
 Home Page
-[Home Page](https://drive.google.com/file/d/1A13o-b0SgeRNnqdgfP1YKOyBCa_ujxh7/view?usp=drive_link)
+![Home Page](strong-sister/assets/appimages/homepage.png)  
 
 Safe Contacts
-[Safe Contacts](https://drive.google.com/file/d/1uJhlPlhsuzIzrefPG_DwkpCUfan8qxBS/view?usp=drive_link)
+![Safe Contacts](strong-sister/assets/appimages/safecontacts.png)  
 
 AI ChatBot
-[AI ChatBot](https://drive.google.com/file/d/16bdF_c_mVVil0IpWbEyQryIi_6Hh3qMD/view?usp=drive_link)
+![AI ChatBot](strong-sister/assets/appimages/chatbot.png)  
 
 Community Feed
-[Community Feed](https://drive.google.com/file/d/1yJqexB9LUY920WV5f6VFQJ_fkJih5dmM/view?usp=drive_link)
+![Community Feed](strong-sister/assets/appimages/community.png)  
 
 Profile Management
-[Profile Management](https://drive.google.com/file/d/1iCuKP6zRxAYALOj_BjYCRyTPZ-ls6sSu/view?usp=drive_link)
+![Profile Management](strong-sister/assets/appimages/profile.ong)  
 
 
 ## Authors
