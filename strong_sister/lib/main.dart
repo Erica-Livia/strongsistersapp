@@ -16,7 +16,7 @@ import 'package:strong_sister/screens/profile_management.dart';
 import 'package:strong_sister/screens/camera_screen.dart';
 
 void main() async {
-  // await dotenv.load(fileName: ".env");
+  await dotenv.load(fileName: "../.env");
   WidgetsFlutterBinding.ensureInitialized();
   try {
     await Firebase.initializeApp(
@@ -31,7 +31,7 @@ void main() async {
     MultiProvider(
       providers: [
         Provider<OpenAIService>(
-          create: (_) => OpenAIService(dotenv.env['OPENAI_API_KEY']!),
+          create: (_) => OpenAIService(),
         ),
       ],
       child: MyApp(),
@@ -44,6 +44,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Strong Sister',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),

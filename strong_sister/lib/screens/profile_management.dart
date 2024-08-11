@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/custom_navigation_bar.dart';
 
-
 class ProfileScreen extends StatefulWidget {
   @override
   _ProfileScreenState createState() => _ProfileScreenState();
@@ -13,11 +12,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Profile'),
-        backgroundColor: Colors.teal,
+        backgroundColor: Colors.grey[300],
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
-            Navigator.pop(context); 
+            Navigator.pop(context);
           },
         ),
         actions: [
@@ -34,14 +33,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // User Information (you can replace these with actual user data)
             Text(
-              'User Name: John Doe',
+              'Erica-Livia',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 10),
             Text(
-              'Email: johndoe@example.com',
+              'ingabireericalivia@gmail.com',
               style: TextStyle(fontSize: 16),
             ),
             SizedBox(height: 30),
@@ -50,7 +48,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Expanded(
               child: ListView(
                 children: [
-                  _buildProfileAction(Icons.refresh, 'Available', 'Change Status'),
+                  _buildProfileAction(
+                      Icons.refresh, 'Available', 'Change Status'),
                   _buildProfileAction(Icons.location_pin, 'Set Location', ''),
                   _buildProfileAction(Icons.language, 'App Language', ''),
                   _buildProfileAction(Icons.help, 'Help', ''),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:strong_sister/widgets/custom_navigation_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:strong_sister/services/openai_service.dart';
+import 'package:strong_sister/widgets/custom_navigation_bar.dart';
 
 class AIChatbotScreen extends StatefulWidget {
   @override
@@ -18,7 +18,7 @@ class _AIChatbotScreenState extends State<AIChatbotScreen> {
 
     setState(() {
       _messages.add({'sender': 'user', 'text': _controller.text});
-      _isLoading = true; // Show loading indicator
+      _isLoading = true;
     });
 
     try {
@@ -33,11 +33,11 @@ class _AIChatbotScreenState extends State<AIChatbotScreen> {
       setState(() {
         _messages.add({
           'sender': 'bot',
-          'text': 'Sorry, something went wrong. Please try again later.'
+          'text': 'Hey there, How are you doing?'
         });
         _isLoading = false;
       });
-      print('Error: $e');
+      print('Error during _sendMessage: $e');
     }
 
     _controller.clear();
