@@ -1,6 +1,6 @@
 # Strong Sister App
 
-![Strong Sister Logo](strong-sister/assets/appimages/logo.jpg)  
+![Strong Sister Logo](strong_sister/assets/appimages/logo.jpg)  
 
 ## Table of Contents
 - [Project Overview](#project-overview)
@@ -39,7 +39,7 @@ To get a local copy up and running, follow these steps:
 ### Steps
 1. **Clone the Repository**
    ```bash
-   git clone https://github.com/yourusername/strong-sister-app.git
+   git clone https://github.com/yourusername/strong_sister-app.git
 
 2. **Navigate to the Project Directory**
     cd strongsisterapp
@@ -72,25 +72,25 @@ After installing, you can use the app for the following:
 (Production Still in Progress)
 
 Welcome
-![Welcome Screen](strong-sister/assets/appimages/welcome.png)
+![Welcome Screen](strong_sister/assets/appimages/welcome.png)
 
 Login
-![Login Screen](strong-sister/assets/appimages/login.png)  
+![Login Screen](strong_sister/assets/appimages/login.png)  
 
 Home Page
-![Home Page](strong-sister/assets/appimages/homepage.png)  
+![Home Page](strong_sister/assets/appimages/homepage.png)  
 
 Safe Contacts
-![Safe Contacts](strong-sister/assets/appimages/safecontacts.png)  
+![Safe Contacts](strong_sister/assets/appimages/safecontacts.png)  
 
 AI ChatBot
-![AI ChatBot](strong-sister/assets/appimages/chatbot.png)  
+![AI ChatBot](strong_sister/assets/appimages/chatbot.png)  
 
 Community Feed
-![Community Feed](strong-sister/assets/appimages/community.png)  
+![Community Feed](strong_sister/assets/appimages/community.png)  
 
 Profile Management
-![Profile Management](strong-sister/assets/appimages/profile.ong)  
+![Profile Management](strong_sister/assets/appimages/profile.ong)  
 
 
 ## Authors
