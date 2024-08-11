@@ -72,25 +72,25 @@ After installing, you can use the app for the following:
 (Production Still in Progress)
 
 Welcome
-![Welcome Screen](strong_sister/assets/appimages/welcome.png)
+<img src="strong_sister/assets/appimages/welcome.png" alt="Welcome Screen" width="400"/>
 
 Login
-![Login Screen](strong_sister/assets/appimages/login.png)  
+<img src="strong_sister/assets/appimages/login.png" alt="Login Screen" width="400"/>
 
 Home Page
-![Home Page](strong_sister/assets/appimages/homepage.png)  
+<img src="strong_sister/assets/appimages/homepage.png" alt="Home Page" width="400"/>
 
 Safe Contacts
-![Safe Contacts](strong_sister/assets/appimages/safecontacts.png)  
+<img src="strong_sister/assets/appimages/safecontacts.png" alt="Safe Contacts" width="400"/>
 
 AI ChatBot
-![AI ChatBot](strong_sister/assets/appimages/chatbot.png)  
+<img src="strong_sister/assets/appimages/chatbot.png" alt="AI ChatBot" width="400"/>
 
 Community Feed
-![Community Feed](strong_sister/assets/appimages/community.png)  
+<img src="strong_sister/assets/appimages/community.png" alt="Community Feed" width="400"/>
 
 Profile Management
-![Profile Management](strong_sister/assets/appimages/profile.ong)  
+<img src="strong_sister/assets/appimages/profile.png" alt="Profile Management" width="400"/>
 
 
 ## Authors
