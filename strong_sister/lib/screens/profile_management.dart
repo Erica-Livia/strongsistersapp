@@ -11,42 +11,72 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Profile Management'),
-        backgroundColor: Colors.teal,
+        title: Text('Profile'),
+        backgroundColor: Colors.grey[300],
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.edit),
+            onPressed: () {
+              // Handle edit profile action
+            },
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // User Information (you can replace these with actual user data)
             Text(
-              'User Name: John Doe',
+              'Erica-Livia',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 10),
             Text(
-              'Email: johndoe@example.com',
+              'ingabireericalivia@gmail.com',
               style: TextStyle(fontSize: 16),
             ),
             SizedBox(height: 30),
 
-            // Logout Button
-            Center(
-              child: ElevatedButton(
-                onPressed: () => _showLogoutWarning(context),
-                child: Text('Logout'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                  textStyle: TextStyle(fontSize: 16),
-                ),
+            // Profile Actions
+            Expanded(
+              child: ListView(
+                children: [
+                  _buildProfileAction(
+                      Icons.refresh, 'Available', 'Change Status'),
+                  _buildProfileAction(Icons.location_pin, 'Set Location', ''),
+                  _buildProfileAction(Icons.language, 'App Language', ''),
+                  _buildProfileAction(Icons.help, 'Help', ''),
+                  _buildProfileAction(Icons.logout, 'Logout', ''),
+                ],
               ),
             ),
           ],
         ),
       ),
       bottomNavigationBar: CustomNavigationBar(),
+    );
+  }
+
+  Widget _buildProfileAction(IconData icon, String title, String subtitle) {
+    return ListTile(
+      leading: Icon(icon),
+      title: Text(title),
+      subtitle: subtitle.isNotEmpty ? Text(subtitle) : null,
+      onTap: () {
+        // Handle tap on profile action
+        if (title == 'Logout') {
+          _showLogoutWarning(context);
+        } else {
+          // Handle other actions
+        }
+      },
     );
   }
 

@@ -4,6 +4,7 @@ import '../screens/ai_chatbot.dart';
 import '../screens/safe_contacts.dart';
 import '../screens/community_screen.dart';
 import '../screens/profile_management.dart';
+import '../screens/camera_screen.dart';
 
 class CustomNavigationBar extends StatefulWidget {
   @override
@@ -17,6 +18,7 @@ class _CustomNavigationBarState extends State<CustomNavigationBar> {
   final List<Widget> _screens = [
     HomeScreen(),
     SafeContactsScreen(),
+    CameraScreen(),
     AIChatbotScreen(),
     CommunityScreen(),
     ProfileScreen(),
@@ -35,12 +37,15 @@ class _CustomNavigationBarState extends State<CustomNavigationBar> {
         Navigator.pushNamed(context, '/contacts');
         break;
       case 2:
-        Navigator.pushNamed(context, '/aichatbot');
+        Navigator.pushNamed(context, '/camera');
         break;
       case 3:
-        Navigator.pushNamed(context, '/community');
+        Navigator.pushNamed(context, '/aichatbot');
         break;
       case 4:
+        Navigator.pushNamed(context, '/community');
+        break;
+      case 5:
         Navigator.pushNamed(context, '/profile');
         break;
     }
@@ -59,6 +64,10 @@ class _CustomNavigationBarState extends State<CustomNavigationBar> {
         BottomNavigationBarItem(
           icon: Icon(Icons.contacts),
           label: 'Contacts',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.camera_alt),
+          label: 'Camera',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.chat),
