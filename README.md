@@ -11,8 +11,7 @@ Strong Sister Logo
 - [Usage](#usage)
 - [Screenshots](#screenshots)
 - [API Documentation](#api-documentation)
-- [Contributing](#contributing)
-- [License](#license)
+- [Contributing](#authors)
 - [Contact](#contact)
 
 ## Project Overview
