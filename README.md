@@ -1,6 +1,6 @@
 # Strong Sister App
 
-![Strong Sister Logo](https://drive.google.com/file/d/1cjc7uKnLyvHMSd3Cdx3afYE1I-sIwrMZ/view?usp=drive_link)  
+[Strong Sister Logo](https://drive.google.com/file/d/1cjc7uKnLyvHMSd3Cdx3afYE1I-sIwrMZ/view?usp=drive_link)  
 
 ## Table of Contents
 - [Project Overview](#project-overview)
