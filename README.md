@@ -1,6 +1,7 @@
 # Strong Sister App
 
-![Strong Sister Logo](strong_sister/assets/appimages/logo.jpg)  
+Strong Sister Logo  
+<img src="strong_sister/assets/appimages/logo.jpg" alt="Community Feed" width="250"/>
 
 ## Table of Contents
 - [Project Overview](#project-overview)
