@@ -1,15 +1,59 @@
 import 'package:flutter/material.dart';
-import 'package:strong_sister/widgets/custom_navigation_bar.dart';
+import 'package:geolocator/geolocator.dart'; // For getting the current location
+import 'package:geocoding/geocoding.dart'; // For converting coordinates to an address
+import 'package:permission_handler/permission_handler.dart'; // For handling permissions
+import '../widgets/custom_navigation_bar.dart';
 
+class HomeScreen extends StatefulWidget {
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
 
-class HomeScreen extends StatelessWidget {
+class _HomeScreenState extends State<HomeScreen> {
+  String _address = 'Fetching location...';
+  DateTime _timestamp = DateTime.now();
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchLocation();
+  }
+
+  Future<void> _fetchLocation() async {
+    // Request location permission
+    PermissionStatus permissionStatus = await Permission.location.request();
+
+    if (permissionStatus.isGranted) {
+      try {
+        Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high,
+        );
+        List<Placemark> placemarks = await placemarkFromCoordinates(
+          position.latitude,
+          position.longitude,
+        );
+        if (placemarks.isNotEmpty) {
+          Placemark place = placemarks[0];
+          String address = '${place.street}, ${place.subLocality}, ${place.locality}, ${place.country}';
+          setState(() {
+            _address = address;
+            _timestamp = DateTime.now();
+          });
+        }
+      } catch (e) {
+        setState(() {
+          _address = 'Unable to fetch location';
+        });
+      }
+    } else {
+      setState(() {
+        _address = 'Location permission denied';
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Retrieve the address and timestamp from the arguments
-    final Map arguments = ModalRoute.of(context)!.settings.arguments as Map;
-    final String address = arguments['address'];
-    final DateTime timestamp = arguments['timestamp'];
-
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
@@ -26,7 +70,7 @@ class HomeScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Location: $address - ${_formatTimestamp(timestamp)}',
+                        'Location: $_address - ${_formatTimestamp(_timestamp)}',
                         style: TextStyle(
                           fontSize: 16.0,
                           fontWeight: FontWeight.bold,
@@ -207,7 +251,6 @@ class HomeScreen extends StatelessWidget {
   }
 
   String _formatTimestamp(DateTime timestamp) {
-    // Format the timestamp as you need (e.g., "10 Aug / 22h50")
     return "${timestamp.day} ${_monthString(timestamp.month)} / ${timestamp.hour}h${timestamp.minute.toString().padLeft(2, '0')}";
   }
 
@@ -218,7 +261,6 @@ class HomeScreen extends StatelessWidget {
     ];
     return months[month - 1];
   }
-  
 
   Widget _buildEmergencyButton({
     required IconData icon,

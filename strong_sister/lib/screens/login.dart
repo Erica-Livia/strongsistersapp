@@ -21,8 +21,8 @@ class _LoginScreenState extends State<LoginScreen> {
           password: _passwordController.text,
         );
 
-        // Navigate to home screen after successful login
-        Navigator.pushReplacementNamed(context, '/home');
+        // Navigate to the location screen after successful login
+        Navigator.pushReplacementNamed(context, '/location');
       } catch (e) {
         setState(() {
           _errorMessage = e.toString();

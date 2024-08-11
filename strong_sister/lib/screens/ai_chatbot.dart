@@ -11,7 +11,7 @@ class AIChatbotScreen extends StatefulWidget {
 class _AIChatbotScreenState extends State<AIChatbotScreen> {
   final TextEditingController _controller = TextEditingController();
   final List<Map<String, String>> _messages = [];
-  bool _isLoading = false; // Track loading state
+  bool _isLoading = false;
 
   void _sendMessage() async {
     if (_controller.text.isEmpty) return;
@@ -33,11 +33,11 @@ class _AIChatbotScreenState extends State<AIChatbotScreen> {
       setState(() {
         _messages.add({
           'sender': 'bot',
-          'text': 'Hey there, How are you doing?'
+          'text': 'Sorry, something went wrong. Please try again later.'
         });
         _isLoading = false;
       });
-      print('Error during _sendMessage: $e');
+      print('Error: $e');
     }
 
     _controller.clear();
@@ -48,7 +48,7 @@ class _AIChatbotScreenState extends State<AIChatbotScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Support Chat'),
-        backgroundColor: Colors.grey[100],
+        backgroundColor: Colors.red,
       ),
       body: Column(
         children: [
@@ -63,11 +63,10 @@ class _AIChatbotScreenState extends State<AIChatbotScreen> {
                   alignment:
                       isUser ? Alignment.centerRight : Alignment.centerLeft,
                   child: Container(
-                    margin:
-                        EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
+                    margin: EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
                     padding: EdgeInsets.all(10.0),
                     decoration: BoxDecoration(
-                      color: isUser ? Colors.teal[100] : Colors.grey[200],
+                      color: isUser ? Colors.red : Colors.grey[300],
                       borderRadius: BorderRadius.circular(10.0),
                     ),
                     child: Text(
@@ -109,7 +108,7 @@ class _AIChatbotScreenState extends State<AIChatbotScreen> {
                 IconButton(
                   icon: Icon(Icons.send),
                   onPressed: _sendMessage,
-                  color: Colors.teal,
+                  color: Colors.red,
                 ),
               ],
             ),

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../widgets/custom_navigation_bar.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -7,16 +9,49 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  String _userName = '';
+  String _userEmail = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserData();
+  }
+
+  Future<void> _fetchUserData() async {
+    try {
+      User? user = _auth.currentUser;
+      if (user != null) {
+        DocumentSnapshot userDoc = await _firestore.collection('users').doc(user.uid).get();
+        if (userDoc.exists) {
+          setState(() {
+            _userName = userDoc['name'];
+            _userEmail = userDoc['email'];
+          });
+        } else {
+          print('User document does not exist');
+        }
+      } else {
+        print('No user is currently signed in');
+      }
+    } catch (e) {
+      print('Error fetching user data: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Profile'),
-        backgroundColor: Colors.grey[300],
+        backgroundColor: Colors.teal,
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
-            Navigator.pop(context);
+            Navigator.pop(context); 
           },
         ),
         actions: [
@@ -34,22 +69,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Erica-Livia',
+              'User Name: $_userName',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 10),
             Text(
-              'ingabireericalivia@gmail.com',
+              'Email: $_userEmail',
               style: TextStyle(fontSize: 16),
             ),
             SizedBox(height: 30),
 
-            // Profile Actions
             Expanded(
               child: ListView(
                 children: [
-                  _buildProfileAction(
-                      Icons.refresh, 'Available', 'Change Status'),
+                  _buildProfileAction(Icons.refresh, 'Available', 'Change Status'),
                   _buildProfileAction(Icons.location_pin, 'Set Location', ''),
                   _buildProfileAction(Icons.language, 'App Language', ''),
                   _buildProfileAction(Icons.help, 'Help', ''),
@@ -70,11 +103,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       title: Text(title),
       subtitle: subtitle.isNotEmpty ? Text(subtitle) : null,
       onTap: () {
-        // Handle tap on profile action
         if (title == 'Logout') {
           _showLogoutWarning(context);
-        } else {
-          // Handle other actions
         }
       },
     );
@@ -90,7 +120,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(context).pop(); 
               },
               child: Text('Cancel'),
               style: TextButton.styleFrom(
@@ -99,7 +129,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(context).pop(); 
                 _logout(context);
               },
               child: Text('Logout'),
@@ -114,8 +144,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _logout(BuildContext context) {
-    // Perform the logout operation here (e.g., clear user data, navigate to login screen)
-    // Example:
-    // Navigator.of(context).pushReplacementNamed('/login');
+    _auth.signOut();
+    Navigator.of(context).pushReplacementNamed('/login');
   }
 }
