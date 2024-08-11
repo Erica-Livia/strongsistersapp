@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
-import '../widgets/custom_navigation_bar.dart';
+import 'package:strong_sister/widgets/custom_navigation_bar.dart';
 
-class HomeScreen extends StatefulWidget {
-  @override
-  _HomeScreenState createState() => _HomeScreenState();
-}
 
-class _HomeScreenState extends State<HomeScreen> {
+class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    // Retrieve the address and timestamp from the arguments
+    final Map arguments = ModalRoute.of(context)!.settings.arguments as Map;
+    final String address = arguments['address'];
+    final DateTime timestamp = arguments['timestamp'];
+
     return Scaffold(
       body: SingleChildScrollView(
-        // Make the screen scrollable
         child: Column(
           children: [
             // Location and Emergency Information Section
@@ -26,7 +26,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Location: Kabuga, Kigali, Rwanda',
+                        'Location: $address - ${_formatTimestamp(timestamp)}',
                         style: TextStyle(
                           fontSize: 16.0,
                           fontWeight: FontWeight.bold,
@@ -62,7 +62,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       SizedBox(width: 16.0),
                       Image.asset(
-                        'assets/emergency_image.jpg', // Ensure the image is in the assets directory
+                        'assets/emergency_image.jpg',
                         height: 100.0,
                         width: 100.0,
                       ),
@@ -135,7 +135,7 @@ class _HomeScreenState extends State<HomeScreen> {
             // Emergency Type Section
             Container(
               padding: EdgeInsets.all(16.0),
-              color: Color(0xFFF5F5FA), // Light background color
+              color: Color(0xFFF5F5FA),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -206,6 +206,20 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  String _formatTimestamp(DateTime timestamp) {
+    // Format the timestamp as you need (e.g., "10 Aug / 22h50")
+    return "${timestamp.day} ${_monthString(timestamp.month)} / ${timestamp.hour}h${timestamp.minute.toString().padLeft(2, '0')}";
+  }
+
+  String _monthString(int month) {
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+    return months[month - 1];
+  }
+  
+
   Widget _buildEmergencyButton({
     required IconData icon,
     required String label,
@@ -214,7 +228,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         padding: EdgeInsets.all(16.0),
-        backgroundColor: Color(0xFFCDBCB2), // Beige button color
+        backgroundColor: Color(0xFFCDBCB2),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12.0),
         ),
@@ -226,7 +240,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Icon(
             icon,
             size: 40.0,
-            color: Color(0xFF93232A), // Dark red icon color
+            color: Color(0xFF93232A),
           ),
           SizedBox(height: 8.0),
           Text(
