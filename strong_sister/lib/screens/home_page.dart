@@ -3,6 +3,7 @@ import 'package:geolocator/geolocator.dart'; // For getting the current location
 import 'package:geocoding/geocoding.dart'; // For converting coordinates to an address
 import 'package:permission_handler/permission_handler.dart'; // For handling permissions
 import '../widgets/custom_navigation_bar.dart';
+import 'emergency_action_screen.dart'; // Import the new screen
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -200,42 +201,84 @@ class _HomeScreenState extends State<HomeScreen> {
                         icon: Icons.report,
                         label: 'Violence',
                         onPressed: () {
-                          // Handle button press
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => EmergencyActionScreen(
+                                emergencyType: 'Violence',
+                              ),
+                            ),
+                          );
                         },
                       ),
                       _buildEmergencyButton(
                         icon: Icons.warning_amber_rounded,
                         label: 'Other Incident',
                         onPressed: () {
-                          // Handle button press
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => EmergencyActionScreen(
+                                emergencyType: 'Other Incident',
+                              ),
+                            ),
+                          );
                         },
                       ),
                       _buildEmergencyButton(
                         icon: Icons.health_and_safety,
                         label: 'Medical Emergency',
                         onPressed: () {
-                          // Handle button press
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => EmergencyActionScreen(
+                                emergencyType: 'Medical Emergency',
+                              ),
+                            ),
+                          );
                         },
                       ),
                       _buildEmergencyButton(
                         icon: Icons.car_crash,
                         label: 'Car Accident',
                         onPressed: () {
-                          // Handle button press
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => EmergencyActionScreen(
+                                emergencyType: 'Car Accident',
+                              ),
+                            ),
+                          );
                         },
                       ),
                       _buildEmergencyButton(
                         icon: Icons.fire_truck,
                         label: 'Fire',
                         onPressed: () {
-                          // Handle button press
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => EmergencyActionScreen(
+                                emergencyType: 'Fire',
+                              ),
+                            ),
+                          );
                         },
                       ),
                       _buildEmergencyButton(
                         icon: Icons.warning,
                         label: 'Other',
                         onPressed: () {
-                          // Handle button press
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => EmergencyActionScreen(
+                                emergencyType: 'Other',
+                              ),
+                            ),
+                          );
                         },
                       ),
                     ],
