@@ -14,6 +14,7 @@ import 'package:strong_sister/screens/ai_chatbot.dart';
 import 'package:strong_sister/screens/community_screen.dart';
 import 'package:strong_sister/screens/profile_management.dart';
 import 'package:strong_sister/screens/camera_screen.dart';
+import 'package:strong_sister/screens/auth_check_screen.dart';
 
 void main() async {
   await dotenv.load(fileName: "../.env");
@@ -50,6 +51,7 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: '/',
       routes: {
+        '/auth-check': (context) => AuthCheckScreen(),
         '/': (context) => LoginScreen(),
         '/register': (context) => RegisterScreen(),
         '/home': (context) => HomeScreen(),

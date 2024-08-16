@@ -3,7 +3,12 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:strong_sister/models/contact.dart'; // Import the Contact class
+import 'package:strong_sister/models/contact.dart';
+import 'package:strong_sister/screens/home_page.dart';
+import 'package:strong_sister/screens/ai_chatbot.dart';
+import 'package:strong_sister/screens/community_screen.dart';
+import 'package:strong_sister/screens/profile_management.dart';
+import 'package:strong_sister/screens/camera_screen.dart';
 import '../widgets/custom_navigation_bar.dart';
 import '../widgets/buildContactList.dart';
 
@@ -13,6 +18,35 @@ class SafeContactsScreen extends StatefulWidget {
 }
 
 class _SafeContactsScreenState extends State<SafeContactsScreen> {
+  int _selectedIndex = 1;
+  final List<Widget> _screens = [
+    HomeScreen(),
+    SafeContactsScreen(),
+    CameraScreen(),
+    AIChatbotScreen(),
+    CommunityScreen(),
+    ProfileScreen(),
+  ];
+  Route createCustomRoute(Widget page) {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => page,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        const begin = Offset(1.0, 0.0);
+        const end = Offset.zero;
+        const curve = Curves.easeInOut;
+
+        var tween =
+            Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+        var offsetAnimation = animation.drive(tween);
+
+        return SlideTransition(
+          position: offsetAnimation,
+          child: child,
+        );
+      },
+    );
+  }
+
   List<Contact> _contacts = [];
   Contact _newContact = Contact(id: '', name: '', phone: '', relationship: '');
   bool _isEditing = false;
@@ -30,6 +64,20 @@ class _SafeContactsScreenState extends State<SafeContactsScreen> {
     _authenticateAndLoadContacts();
   }
 
+  void _onItemTapped(int index) {
+    if (index != _selectedIndex) {
+      setState(() {
+        _selectedIndex = index;
+      });
+
+      // Instant transition to the selected screen
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => _screens[index]),
+      );
+    }
+  }
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -45,7 +93,7 @@ class _SafeContactsScreenState extends State<SafeContactsScreen> {
       _loadContacts();
     } else {
       // Redirect to login screen if user is not authenticated
-      Navigator.pushReplacementNamed(context, '/');
+      Navigator.pushReplacementNamed(context, '/auth-check');
     }
   }
 
@@ -237,6 +285,7 @@ class _SafeContactsScreenState extends State<SafeContactsScreen> {
         title: Text('Contacts'),
         backgroundColor: Colors.white,
         elevation: 4,
+        automaticallyImplyLeading: false, // Removes the back button
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -246,13 +295,17 @@ class _SafeContactsScreenState extends State<SafeContactsScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: CustomNavigationBar(),
+      bottomNavigationBar: CustomNavigationBar(
+        selectedIndex: _selectedIndex,
+        onItemTapped: _onItemTapped,
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           setState(() {
             _isEditing = false;
             _currentIndex = -1;
-            _newContact = Contact(id: '', name: '', phone: '', relationship: '');
+            _newContact =
+                Contact(id: '', name: '', phone: '', relationship: '');
           });
           _showContactModal();
         },
@@ -279,7 +332,8 @@ class _SafeContactsScreenState extends State<SafeContactsScreen> {
             '${contact.name}',
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
-          subtitle: Text('${contact.phone}\nRelationship: ${contact.relationship}'),
+          subtitle:
+              Text('${contact.phone}\nRelationship: ${contact.relationship}'),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [

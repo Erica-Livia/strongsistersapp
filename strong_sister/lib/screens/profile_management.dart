@@ -1,5 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../widgets/custom_navigation_bar.dart';
+import 'package:strong_sister/screens/home_page.dart';
+import 'package:strong_sister/screens/ai_chatbot.dart';
+import 'package:strong_sister/screens/safe_contacts.dart';
+import 'package:strong_sister/screens/community_screen.dart';
+import 'package:strong_sister/screens/camera_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   @override
@@ -7,18 +14,71 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  int _selectedIndex = 5;
+  final List<Widget> _screens = [
+    HomeScreen(),
+    SafeContactsScreen(),
+    CameraScreen(),
+    AIChatbotScreen(),
+    CommunityScreen(),
+    ProfileScreen(),
+  ];
+
+  void _onItemTapped(int index) {
+    if (index != _selectedIndex) {
+      setState(() {
+        _selectedIndex = index;
+      });
+
+      // Instant transition to the selected screen
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => _screens[index]),
+      );
+    }
+  }
+
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  String _userName = '';
+  String _userEmail = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserData();
+  }
+
+  Future<void> _fetchUserData() async {
+    try {
+      User? user = _auth.currentUser;
+      if (user != null) {
+        DocumentSnapshot userDoc =
+            await _firestore.collection('users').doc(user.uid).get();
+        if (userDoc.exists) {
+          setState(() {
+            _userName = userDoc['name'];
+            _userEmail = userDoc['email'];
+          });
+        } else {
+          print('User document does not exist');
+        }
+      } else {
+        print('No user is currently signed in');
+      }
+    } catch (e) {
+      print('Error fetching user data: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false, // Removes the back arrow
         title: Text('Profile'),
-        backgroundColor: Colors.grey[300],
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
+        backgroundColor: Colors.grey[200],
         actions: [
           IconButton(
             icon: Icon(Icons.edit),
@@ -34,17 +94,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Erica-Livia',
+              '$_userName',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 10),
             Text(
-              'ingabireericalivia@gmail.com',
+              ' $_userEmail',
               style: TextStyle(fontSize: 16),
             ),
             SizedBox(height: 30),
-
-            // Profile Actions
             Expanded(
               child: ListView(
                 children: [
@@ -60,7 +118,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: CustomNavigationBar(),
+      bottomNavigationBar: CustomNavigationBar(
+        selectedIndex: _selectedIndex,
+        onItemTapped: _onItemTapped,
+      ),
     );
   }
 
@@ -70,11 +131,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       title: Text(title),
       subtitle: subtitle.isNotEmpty ? Text(subtitle) : null,
       onTap: () {
-        // Handle tap on profile action
         if (title == 'Logout') {
           _showLogoutWarning(context);
-        } else {
-          // Handle other actions
         }
       },
     );
@@ -90,7 +148,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(context).pop();
               },
               child: Text('Cancel'),
               style: TextButton.styleFrom(
@@ -99,7 +157,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(context).pop();
                 _logout(context);
               },
               child: Text('Logout'),
@@ -114,8 +172,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _logout(BuildContext context) {
-    // Perform the logout operation here (e.g., clear user data, navigate to login screen)
-    // Example:
-    // Navigator.of(context).pushReplacementNamed('/login');
+    _auth.signOut();
+    Navigator.of(context).pushReplacementNamed('/');
   }
 }
