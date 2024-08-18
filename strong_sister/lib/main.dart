@@ -17,7 +17,7 @@ import 'package:strong_sister/screens/camera_screen.dart';
 import 'package:strong_sister/screens/auth_check_screen.dart';
 
 void main() async {
-  await dotenv.load(fileName: "../.env");
+  dotenv.load(fileName: "../.env");
   WidgetsFlutterBinding.ensureInitialized();
   try {
     await Firebase.initializeApp(
