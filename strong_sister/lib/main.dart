@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:strong_sister/services/openai_service.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:strong_sister/firebase_options.dart';
 import 'package:strong_sister/screens/login.dart';
 import 'package:strong_sister/screens/register.dart';
@@ -12,9 +14,10 @@ import 'package:strong_sister/screens/ai_chatbot.dart';
 import 'package:strong_sister/screens/community_screen.dart';
 import 'package:strong_sister/screens/profile_management.dart';
 import 'package:strong_sister/screens/camera_screen.dart';
+import 'package:strong_sister/screens/auth_check_screen.dart';
 
 void main() async {
-  // await dotenv.load(fileName: ".env");
+  await dotenv.load(fileName: "../.env");
   WidgetsFlutterBinding.ensureInitialized();
   try {
     await Firebase.initializeApp(
@@ -29,7 +32,7 @@ void main() async {
     MultiProvider(
       providers: [
         Provider<OpenAIService>(
-          create: (_) => OpenAIService(dotenv.env['OPENAI_API_KEY']!),
+          create: (_) => OpenAIService(),
         ),
       ],
       child: MyApp(),
@@ -42,11 +45,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Strong Sister',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
       initialRoute: '/',
       routes: {
+        '/auth-check': (context) => AuthCheckScreen(),
         '/': (context) => LoginScreen(),
         '/register': (context) => RegisterScreen(),
         '/home': (context) => HomeScreen(),

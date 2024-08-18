@@ -1,5 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../widgets/custom_navigation_bar.dart';
+import 'package:strong_sister/screens/home_page.dart';
+import 'package:strong_sister/screens/ai_chatbot.dart';
+import 'package:strong_sister/screens/safe_contacts.dart';
+import 'package:strong_sister/screens/community_screen.dart';
+import 'package:strong_sister/screens/camera_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   @override
@@ -7,46 +14,127 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  int _selectedIndex = 5;
+  final List<Widget> _screens = [
+    HomeScreen(),
+    SafeContactsScreen(),
+    CameraScreen(),
+    AIChatbotScreen(),
+    CommunityScreen(),
+    ProfileScreen(),
+  ];
+
+  void _onItemTapped(int index) {
+    if (index != _selectedIndex) {
+      setState(() {
+        _selectedIndex = index;
+      });
+
+      // Instant transition to the selected screen
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => _screens[index]),
+      );
+    }
+  }
+
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  String _userName = '';
+  String _userEmail = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserData();
+  }
+
+  Future<void> _fetchUserData() async {
+    try {
+      User? user = _auth.currentUser;
+      if (user != null) {
+        DocumentSnapshot userDoc =
+            await _firestore.collection('users').doc(user.uid).get();
+        if (userDoc.exists) {
+          setState(() {
+            _userName = userDoc['name'];
+            _userEmail = userDoc['email'];
+          });
+        } else {
+          print('User document does not exist');
+        }
+      } else {
+        print('No user is currently signed in');
+      }
+    } catch (e) {
+      print('Error fetching user data: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false, // Removes the back arrow
         title: Text('Profile'),
         backgroundColor: Colors.grey[200],
+        actions: [
+          IconButton(
+            icon: Icon(Icons.edit),
+            onPressed: () {
+              // Handle edit profile action
+            },
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // User Information (you can replace these with actual user data)
             Text(
-              'User Name: John Doe',
+              '$_userName',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 10),
             Text(
-              'Email: johndoe@example.com',
+              ' $_userEmail',
               style: TextStyle(fontSize: 16),
             ),
             SizedBox(height: 30),
-
-            // Logout Button
-            Center(
-              child: ElevatedButton(
-                onPressed: () => _showLogoutWarning(context),
-                child: Text('Logout'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                  textStyle: TextStyle(fontSize: 16),
-                ),
+            Expanded(
+              child: ListView(
+                children: [
+                  _buildProfileAction(
+                      Icons.refresh, 'Available', 'Change Status'),
+                  _buildProfileAction(Icons.location_pin, 'Set Location', ''),
+                  _buildProfileAction(Icons.language, 'App Language', ''),
+                  _buildProfileAction(Icons.help, 'Help', ''),
+                  _buildProfileAction(Icons.logout, 'Logout', ''),
+                ],
               ),
             ),
           ],
         ),
       ),
-      bottomNavigationBar: CustomNavigationBar(),
+      bottomNavigationBar: CustomNavigationBar(
+        selectedIndex: _selectedIndex,
+        onItemTapped: _onItemTapped,
+      ),
+    );
+  }
+
+  Widget _buildProfileAction(IconData icon, String title, String subtitle) {
+    return ListTile(
+      leading: Icon(icon),
+      title: Text(title),
+      subtitle: subtitle.isNotEmpty ? Text(subtitle) : null,
+      onTap: () {
+        if (title == 'Logout') {
+          _showLogoutWarning(context);
+        }
+      },
     );
   }
 
@@ -60,7 +148,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(context).pop();
               },
               child: Text('Cancel'),
               style: TextButton.styleFrom(
@@ -69,7 +157,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(context).pop();
                 _logout(context);
               },
               child: Text('Logout'),
@@ -84,8 +172,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _logout(BuildContext context) {
-    // Perform the logout operation here (e.g., clear user data, navigate to login screen)
-    // Example:
-    // Navigator.of(context).pushReplacementNamed('/login');
+    _auth.signOut();
+    Navigator.of(context).pushReplacementNamed('/');
   }
 }

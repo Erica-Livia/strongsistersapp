@@ -1,19 +1,58 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:strong_sister/screens/home_page.dart';
+import 'package:strong_sister/screens/ai_chatbot.dart';
+import 'package:strong_sister/screens/safe_contacts.dart';
+import 'package:strong_sister/screens/profile_management.dart';
+import 'package:strong_sister/screens/camera_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:strong_sister/widgets/custom_navigation_bar.dart';
 import '/services/post_service.dart';
 import '/screens/create_post_screen.dart';
 
-class CommunityScreen extends StatelessWidget {
+class CommunityScreen extends StatefulWidget {
+  @override
+  _CommunityScreenState createState() => _CommunityScreenState();
+}
+
+class _CommunityScreenState extends State<CommunityScreen> {
   final PostService _postService = PostService();
-  final String userId =
-      'currentUserId'; // Replace with actual user ID retrieval method
+  int _selectedIndex = 4;
+  final List<Widget> _screens = [
+    HomeScreen(),
+    SafeContactsScreen(),
+    CameraScreen(),
+    AIChatbotScreen(),
+    CommunityScreen(),
+    ProfileScreen(),
+  ];
+
+  void _onItemTapped(int index) {
+    if (index != _selectedIndex) {
+      setState(() {
+        _selectedIndex = index;
+      });
+
+      // Instant transition to the selected screen
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => _screens[index]),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final userId = FirebaseAuth.instance.currentUser?.uid ?? 'anonymous';
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Community Feed'),
+        automaticallyImplyLeading: false, // Removes the back arrow
+        title: Text(
+          'Community Feed',
+          style: TextStyle(color: Colors.black),
+        ),
+        backgroundColor: Colors.grey[200],
         actions: [
           IconButton(
             icon: Icon(Icons.add),
@@ -32,7 +71,6 @@ class CommunityScreen extends StatelessWidget {
           if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           }
-
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
           }
@@ -48,16 +86,43 @@ class CommunityScreen extends StatelessWidget {
                 builder: (context, likeSnapshot) {
                   bool hasLiked = likeSnapshot.data ?? false;
                   return Card(
-                    margin: EdgeInsets.all(8.0),
+                    margin: EdgeInsets.all(8),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    elevation: 2,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         if (post['imageUrl'] != null &&
                             post['imageUrl'].isNotEmpty)
-                          Image.network(post['imageUrl']),
+                          ClipRRect(
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(10),
+                              topRight: Radius.circular(10),
+                            ),
+                            child: Image.network(
+                              post['imageUrl'],
+                              fit: BoxFit.cover,
+                              loadingBuilder: (context, child, progress) {
+                                if (progress == null) return child;
+                                return Center(
+                                  child: CircularProgressIndicator(
+                                    value: progress.expectedTotalBytes != null
+                                        ? progress.cumulativeBytesLoaded /
+                                            progress.expectedTotalBytes!
+                                        : null,
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
                         Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: Text(post['content']),
+                          child: Text(
+                            post['content'],
+                            style: TextStyle(fontSize: 16),
+                          ),
                         ),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -66,8 +131,8 @@ class CommunityScreen extends StatelessWidget {
                             children: [
                               IconButton(
                                 icon: Icon(
-                                  hasLiked ? Icons.thumb_up : Icons.thumb_up,
-                                  color: hasLiked ? Colors.red : Colors.black,
+                                  Icons.thumb_up,
+                                  color: hasLiked ? Colors.red : Colors.grey,
                                 ),
                                 onPressed: () {
                                   _postService.likePost(post.id, userId);
@@ -93,7 +158,20 @@ class CommunityScreen extends StatelessWidget {
           );
         },
       ),
-      bottomNavigationBar: CustomNavigationBar(),
+      bottomNavigationBar: CustomNavigationBar(
+        selectedIndex: _selectedIndex,
+        onItemTapped: _onItemTapped,
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => CreatePostScreen()),
+          );
+        },
+        backgroundColor: Colors.red,
+        child: Icon(Icons.add, color: Colors.white),
+      ),
     );
   }
 
@@ -102,14 +180,15 @@ class CommunityScreen extends StatelessWidget {
     final String nickname =
         'ActualNickname'; // Replace with actual nickname retrieval
 
-    showDialog(
+    showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Comments'),
-          content: Column(
+        return Container(
+          padding: EdgeInsets.all(8),
+          child: Column(
             mainAxisSize: MainAxisSize.min,
-            children: [
+            children: <Widget>[
+              Text('Comments', style: Theme.of(context).textTheme.titleLarge),
               Expanded(
                 child: StreamBuilder(
                   stream: _postService.getComments(postId),
@@ -144,23 +223,6 @@ class CommunityScreen extends StatelessWidget {
               ),
             ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('Close'),
-            ),
-            TextButton(
-              onPressed: () {
-                if (_commentController.text.isNotEmpty) {
-                  _postService.addComment(
-                      postId, _commentController.text, nickname);
-                  _commentController.clear();
-                  Navigator.pop(context); // Close the dialog
-                }
-              },
-              child: Text('Post'),
-            ),
-          ],
         );
       },
     );

@@ -1,29 +1,34 @@
-import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class OpenAIService {
-  final String apiKey;
+  final String _apiKey = dotenv.env['OPENAI_API_KEY'] ?? '';
+  Future<String> getChatbotResponse(String prompt) async {
+    final url = Uri.parse('https://api.openai.com/v1/chat/completions');
 
-  OpenAIService(this.apiKey);
-
-  Future<String> getChatbotResponse(String userInput) async {
     final response = await http.post(
-      Uri.parse('https://api.openai.com/v1/engines/davinci-codex/completions'),
+      url,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer $apiKey',
+        'Authorization': 'Bearer $_apiKey',
       },
-      body: json.encode({
-        'prompt': userInput,
-        'max_tokens': 150,
+      body: jsonEncode({
+        "model": "gpt-4o-mini",
+        "messages": [
+          {"role": "system", "content": "You are a helpful assistant."},
+          {"role": "user", "content": prompt},
+        ],
+        "max_tokens": 150,
       }),
     );
 
     if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      return data['choices'][0]['text'].trim();
+      final data = jsonDecode(response.body);
+      return data['choices'][0]['message']['content'].trim();
     } else {
-      throw Exception('Failed to load response');
+      print('Failed to get response: ${response.body}');
+      return 'Sorry, something went wrong. Please try again later.';
     }
   }
 }

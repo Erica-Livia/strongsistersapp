@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:strong_sister/services/post_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:strong_sister/services/post_service.dart';
 
 class CreatePostScreen extends StatefulWidget {
   @override
@@ -17,6 +18,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   bool _isNicknameSet = false;
   PlatformFile? _selectedFile;
   String? _fileUrl;
+  bool _isUploading = false;
 
   @override
   void initState() {
@@ -25,55 +27,65 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   }
 
   Future<void> _checkNickname() async {
-    var userId = 'userId'; // Replace with the actual user ID logic
-    var userDoc =
-        await FirebaseFirestore.instance.collection('users').doc(userId).get();
-    if (userDoc.exists && userDoc.data()!.containsKey('nickname')) {
-      setState(() {
-        _nickname = userDoc['nickname'];
-        _isNicknameSet = true;
-      });
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+
+    if (userId != null) {
+      var userDoc = await FirebaseFirestore.instance
+          .collection('usersNickNames')
+          .doc(userId)
+          .get();
+      if (userDoc.exists && userDoc.data()!.containsKey('nickname')) {
+        setState(() {
+          _nickname = userDoc['nickname'];
+          _isNicknameSet = true;
+        });
+      } else {
+        _showNicknameDialog();
+      }
     } else {
-      _showNicknameDialog();
+      print('User is not authenticated');
     }
   }
 
   void _showNicknameDialog() {
-    // showDialog(
-    //   context: context,
-    //   builder: (context) {
-    //     return AlertDialog(
-    //       title: Text('Set Nickname'),
-    //       content: TextField(
-    //         controller: _nicknameController,
-    //         decoration: InputDecoration(hintText: 'Enter your nickname'),
-    //       ),
-    //       actions: [
-    //         TextButton(
-    //           onPressed: () {
-    //             if (_nicknameController.text.isNotEmpty) {
-    //               setState(() {
-    //                 _nickname = _nicknameController.text;
-    //                 _isNicknameSet = true;
-    //               });
-    //               Navigator.of(context).pop();
-    //               _saveNickname();
-    //             }
-    //           },
-    //           child: Text('Save'),
-    //         ),
-    //       ],
-    //     );
-    //   },
-    // );
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Set Nickname'),
+          content: TextField(
+            controller: _nicknameController,
+            decoration: InputDecoration(hintText: 'Enter your nickname'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                if (_nicknameController.text.isNotEmpty) {
+                  setState(() {
+                    _nickname = _nicknameController.text;
+                    _isNicknameSet = true;
+                  });
+                  Navigator.of(context).pop();
+                  _saveNickname();
+                }
+              },
+              child: Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
-  // Future<void> _saveNickname() async {
-  //   var userId = 'userId'; // Replace with the actual user ID logic
-  //   await FirebaseFirestore.instance.collection('users').doc(userId).set({
-  //     'nickname': _nickname,
-  //   }, SetOptions(merge: true));
-  // }
+  Future<void> _saveNickname() async {
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId != null) {
+      await FirebaseFirestore.instance
+          .collection('usersNickNames')
+          .doc(userId)
+          .set({'nickname': _nickname}, SetOptions(merge: true));
+    }
+  }
 
   Future<void> _selectFile() async {
     final result = await FilePicker.platform.pickFiles();
@@ -89,7 +101,6 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     if (_selectedFile == null) return;
 
     try {
-      print('Starting file upload');
       final fileRef = FirebaseStorage.instance
           .ref()
           .child('post_documents')
@@ -100,9 +111,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       setState(() {
         _fileUrl = fileUrl;
       });
-      print('File uploaded successfully: $fileUrl');
     } catch (e) {
-      // Handle error
       print('File upload error: $e');
     }
   }
@@ -110,11 +119,44 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   void _submitPost() async {
     if (_contentController.text.isNotEmpty && _nickname != null) {
       if (_selectedFile != null) {
+        setState(() {
+          _isUploading = true;
+        });
         await _uploadFile();
       }
-      await _postService.addPost(
-          _contentController.text, _fileUrl ?? '', _nickname!);
+
+      // Proceed to the CommunityScreen and show the progress
       Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: LinearProgressIndicator(
+            backgroundColor: Colors.grey[200],
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+          ),
+          duration: Duration(seconds: 5), // Set duration as needed
+        ),
+      );
+
+      // Perform the post submission in the background
+      try {
+        await _postService.addPost(
+            _contentController.text, _fileUrl ?? '', _nickname!);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Post created successfully!'),
+          ),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to create post. Please try again.'),
+          ),
+        );
+      }
+
+      setState(() {
+        _isUploading = false;
+      });
     }
   }
 
@@ -148,7 +190,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
               Text('Selected File: ${_selectedFile!.name}'),
             SizedBox(height: 20),
             ElevatedButton(
-              onPressed: _submitPost,
+              onPressed: _isUploading ? null : _submitPost,
               child: Text('Submit Post'),
             ),
           ],
