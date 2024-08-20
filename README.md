@@ -1,6 +1,7 @@
 # Strong Sister App
 
-[Strong Sister Logo](https://drive.google.com/file/d/1cjc7uKnLyvHMSd3Cdx3afYE1I-sIwrMZ/view?usp=drive_link)  
+Strong Sister Logo  
+<img src="strong_sister/assets/appimages/logo.jpg" alt="Community Feed" width="250"/>
 
 ## Table of Contents
 - [Project Overview](#project-overview)
@@ -10,8 +11,7 @@
 - [Usage](#usage)
 - [Screenshots](#screenshots)
 - [API Documentation](#api-documentation)
-- [Contributing](#contributing)
-- [License](#license)
+- [Contributing](#authors)
 - [Contact](#contact)
 
 ## Project Overview
@@ -39,7 +39,7 @@ To get a local copy up and running, follow these steps:
 ### Steps
 1. **Clone the Repository**
    ```bash
-   git clone https://github.com/yourusername/strong-sister-app.git
+   git clone https://github.com/yourusername/strong_sister-app.git
 
 2. **Navigate to the Project Directory**
     cd strongsisterapp
@@ -71,26 +71,26 @@ After installing, you can use the app for the following:
 ## Screenshots
 (Production Still in Progress)
 
-Welcome
-[Welcome Screen](https://drive.google.com/file/d/1eaBv4En03EC_eH1DJdHuwtB7Fos3OnnK/view?usp=sharing)
+Welcome  
+<img src="strong_sister/assets/appimages/welcome.png" alt="Welcome Screen" width="400"/>  
 
-Login
-[Login Screen](https://drive.google.com/file/d/1w7iGqatFTQqpPQfivlkYZoFPr-YDI0iV/view?usp=drive_link)
+Login  
+<img src="strong_sister/assets/appimages/login.png" alt="Login Screen" width="400"/>  
 
-Home Page
-[Home Page](https://drive.google.com/file/d/1A13o-b0SgeRNnqdgfP1YKOyBCa_ujxh7/view?usp=drive_link)
+Home Page  
+<img src="strong_sister/assets/appimages/homepage.png" alt="Home Page" width="400"/>  
 
-Safe Contacts
-[Safe Contacts](https://drive.google.com/file/d/1uJhlPlhsuzIzrefPG_DwkpCUfan8qxBS/view?usp=drive_link)
+Safe Contacts  
+<img src="strong_sister/assets/appimages/safecontacts.png" alt="Safe Contacts" width="400"/>  
 
-AI ChatBot
-[AI ChatBot](https://drive.google.com/file/d/16bdF_c_mVVil0IpWbEyQryIi_6Hh3qMD/view?usp=drive_link)
+AI ChatBot  
+<img src="strong_sister/assets/appimages/chatbot.png" alt="AI ChatBot" width="400"/>  
 
-Community Feed
-[Community Feed](https://drive.google.com/file/d/1yJqexB9LUY920WV5f6VFQJ_fkJih5dmM/view?usp=drive_link)
+Community Feed  
+<img src="strong_sister/assets/appimages/community.png" alt="Community Feed" width="400"/>  
 
-Profile Management
-[Profile Management](https://drive.google.com/file/d/1iCuKP6zRxAYALOj_BjYCRyTPZ-ls6sSu/view?usp=drive_link)
+Profile Management  
+<img src="strong_sister/assets/appimages/profile.png" alt="Profile Management" width="400"/>  
 
 
 ## Authors

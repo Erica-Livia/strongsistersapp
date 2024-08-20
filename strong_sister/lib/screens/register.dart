@@ -18,7 +18,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Future<void> _register() async {
     if (_formKey.currentState!.validate()) {
       if (_passwordController.text != _confirmPasswordController.text) {
-        // Show error if passwords do not match
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text("Passwords do not match"),
         ));
@@ -40,7 +39,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
           'name': _nameController.text,
         });
 
+        // Debug log
+        print("User added: ${userCredential.user!.uid}");
+
         Navigator.pushReplacementNamed(context, '/home');
+      } on FirebaseAuthException catch (e) {
+        if (e.code == 'email-already-in-use') {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(
+                "The email address is already in use. Please try another email."),
+          ));
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text("Registration failed: ${e.message}"),
+          ));
+        }
       } catch (e) {
         print(e);
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -120,7 +133,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         style: TextStyle(fontSize: 16, color: Colors.white),
                       ),
                     ),
-                    SizedBox(height: 20),
                     SizedBox(height: 20),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
