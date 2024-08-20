@@ -75,7 +75,7 @@ class PostService {
 
         postRef.collection('comments').add({
           'comment': comment,
-          'nickname': nickname, // Add nickname for the comment
+          'nickname': nickname,
           'timestamp': FieldValue.serverTimestamp(),
         });
       }
@@ -89,6 +89,16 @@ class PostService {
         .collection('comments')
         .orderBy('timestamp', descending: true)
         .snapshots();
+  }
+
+  // Edit a post's content
+  Future<void> editPost(String postId, String newContent) async {
+    final postRef = postsCollection.doc(postId);
+
+    await postRef.update({
+      'content': newContent,
+      'timestamp': FieldValue.serverTimestamp(),
+    });
   }
 
   // Delete a post

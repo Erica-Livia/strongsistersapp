@@ -24,25 +24,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     ProfileScreen(),
   ];
 
-  void _onItemTapped(int index) {
-    if (index != _selectedIndex) {
-      setState(() {
-        _selectedIndex = index;
-      });
-
-      // Instant transition to the selected screen
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => _screens[index]),
-      );
-    }
-  }
-
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   String _userName = '';
   String _userEmail = '';
+
+  DateTime? lastPressed;
 
   @override
   void initState() {
@@ -72,55 +60,89 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  Future<bool> _onWillPop() async {
+    final now = DateTime.now();
+    const backPressDuration = Duration(seconds: 2);
+
+    if (lastPressed == null ||
+        now.difference(lastPressed!) > backPressDuration) {
+      lastPressed = now;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Press back again to exit'),
+          duration: backPressDuration,
+        ),
+      );
+      return Future.value(false);
+    }
+    return Future.value(true);
+  }
+
+  void _onItemTapped(int index) {
+    if (index != _selectedIndex) {
+      setState(() {
+        _selectedIndex = index;
+      });
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => _screens[index]),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false, // Removes the back arrow
-        title: Text('Profile'),
-        backgroundColor: Colors.grey[200],
-        actions: [
-          IconButton(
-            icon: Icon(Icons.edit),
-            onPressed: () {
-              // Handle edit profile action
-            },
-          ),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '$_userName',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 10),
-            Text(
-              ' $_userEmail',
-              style: TextStyle(fontSize: 16),
-            ),
-            SizedBox(height: 30),
-            Expanded(
-              child: ListView(
-                children: [
-                  _buildProfileAction(
-                      Icons.refresh, 'Available', 'Change Status'),
-                  _buildProfileAction(Icons.location_pin, 'Set Location', ''),
-                  _buildProfileAction(Icons.language, 'App Language', ''),
-                  _buildProfileAction(Icons.help, 'Help', ''),
-                  _buildProfileAction(Icons.logout, 'Logout', ''),
-                ],
-              ),
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Scaffold(
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          title: Text('Profile'),
+          backgroundColor: Colors.grey[200],
+          actions: [
+            IconButton(
+              icon: Icon(Icons.edit),
+              onPressed: () {
+                // Handle edit profile action
+              },
             ),
           ],
         ),
-      ),
-      bottomNavigationBar: CustomNavigationBar(
-        selectedIndex: _selectedIndex,
-        onItemTapped: _onItemTapped,
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '$_userName',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 10),
+              Text(
+                '$_userEmail',
+                style: TextStyle(fontSize: 16),
+              ),
+              SizedBox(height: 30),
+              Expanded(
+                child: ListView(
+                  children: [
+                    _buildProfileAction(
+                        Icons.refresh, 'Available', 'Change Status'),
+                    _buildProfileAction(Icons.location_pin, 'Set Location', ''),
+                    _buildProfileAction(Icons.language, 'App Language', ''),
+                    _buildProfileAction(Icons.help, 'Help', ''),
+                    _buildProfileAction(Icons.logout, 'Logout', ''),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        bottomNavigationBar: CustomNavigationBar(
+          selectedIndex: _selectedIndex,
+          onItemTapped: _onItemTapped,
+        ),
       ),
     );
   }

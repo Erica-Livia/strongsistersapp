@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:strong_sister/screens/emergency_action_screen.dart';
 import 'package:strong_sister/services/openai_service.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -15,6 +16,7 @@ import 'package:strong_sister/screens/community_screen.dart';
 import 'package:strong_sister/screens/profile_management.dart';
 import 'package:strong_sister/screens/camera_screen.dart';
 import 'package:strong_sister/screens/auth_check_screen.dart';
+import 'package:strong_sister/screens/emergency_action_screen.dart';
 
 void main() async {
   dotenv.load(fileName: "../.env");
@@ -23,6 +25,7 @@ void main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+    await FirebaseAuth.instance.setPersistence(Persistence.LOCAL);
     print("Firebase initialized successfully");
   } catch (e, stackTrace) {
     print("Error initializing Firebase: $e");
