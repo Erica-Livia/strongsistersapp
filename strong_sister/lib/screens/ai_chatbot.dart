@@ -2,6 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:strong_sister/services/openai_service.dart';
 import 'package:strong_sister/widgets/custom_navigation_bar.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:strong_sister/screens/home_page.dart';
+import 'package:strong_sister/screens/safe_contacts.dart';
+import 'package:strong_sister/screens/community_screen.dart';
+import 'package:strong_sister/screens/profile_management.dart';
+import 'package:strong_sister/screens/camera_screen.dart';
 
 class AIChatbotScreen extends StatefulWidget {
   @override
@@ -10,112 +17,256 @@ class AIChatbotScreen extends StatefulWidget {
 
 class _AIChatbotScreenState extends State<AIChatbotScreen> {
   final TextEditingController _controller = TextEditingController();
-  final List<Map<String, String>> _messages = [];
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   bool _isLoading = false;
+  DateTime? lastPressed; // To track the last back button press time
 
-  void _sendMessage() async {
+  int _selectedIndex = 3;
+  final List<Widget> _screens = [
+    HomeScreen(),
+    SafeContactsScreen(),
+    CameraScreen(),
+    AIChatbotScreen(),
+    CommunityScreen(),
+    ProfileScreen(),
+  ];
+
+  void _onItemTapped(int index) {
+    if (index != _selectedIndex) {
+      setState(() {
+        _selectedIndex = index;
+      });
+
+      // Instant transition to the selected screen
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => _screens[index]),
+      );
+    }
+  }
+
+  Future<void> _sendMessage() async {
     if (_controller.text.isEmpty) return;
 
+    final user = _auth.currentUser;
+    final userId = user?.uid;
+
+    if (userId == null) return;
+
+    final message = {
+      'sender': 'user',
+      'text': _controller.text,
+      'timestamp': FieldValue.serverTimestamp(),
+    };
+
     setState(() {
-      _messages.add({'sender': 'user', 'text': _controller.text});
       _isLoading = true;
     });
 
     try {
+      // Add user's message to Firestore
+      await _firestore
+          .collection('chat_history')
+          .doc(userId)
+          .collection('messages')
+          .add(message);
+
       final response = await Provider.of<OpenAIService>(context, listen: false)
           .getChatbotResponse(_controller.text);
 
+      final botMessage = {
+        'sender': 'bot',
+        'text': response,
+        'timestamp': FieldValue.serverTimestamp(),
+      };
+
+      // Add bot's response to Firestore
+      await _firestore
+          .collection('chat_history')
+          .doc(userId)
+          .collection('messages')
+          .add(botMessage);
+
       setState(() {
-        _messages.add({'sender': 'bot', 'text': response});
         _isLoading = false;
       });
     } catch (e) {
+      print('Error: $e');
       setState(() {
-        _messages.add({
-          'sender': 'bot',
-          'text': 'Sorry, something went wrong. Please try again later.'
-        });
         _isLoading = false;
       });
-      print('Error: $e');
     }
 
     _controller.clear();
   }
 
+  Future<void> _deleteChatHistory() async {
+    final user = _auth.currentUser;
+    final userId = user?.uid;
+
+    if (userId != null) {
+      await _firestore
+          .collection('chat_history')
+          .doc(userId)
+          .collection('messages')
+          .get()
+          .then((snapshot) {
+        for (DocumentSnapshot ds in snapshot.docs) {
+          ds.reference.delete();
+        }
+      });
+
+      setState(() {
+        // Update the UI after deleting chat history
+      });
+    }
+  }
+
+  Future<bool> _onWillPop() async {
+    final now = DateTime.now();
+    const backPressDuration = Duration(seconds: 2);
+
+    if (lastPressed == null ||
+        now.difference(lastPressed!) > backPressDuration) {
+      lastPressed = now;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Press back again to exit'),
+          duration: backPressDuration,
+        ),
+      );
+      return Future.value(false);
+    }
+    return Future.value(true);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Support Chat'),
-        backgroundColor: Colors.red,
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              itemCount: _messages.length,
-              itemBuilder: (context, index) {
-                final message = _messages[index];
-                final isUser = message['sender'] == 'user';
+    final user = _auth.currentUser;
+    final userId = user?.uid;
 
-                return Align(
-                  alignment:
-                      isUser ? Alignment.centerRight : Alignment.centerLeft,
-                  child: Container(
-                    margin: EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
-                    padding: EdgeInsets.all(10.0),
-                    decoration: BoxDecoration(
-                      color: isUser ? Colors.red : Colors.grey[300],
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                    child: Text(
-                      message['text']!,
-                      style: TextStyle(
-                        color: isUser ? Colors.black : Colors.black54,
-                      ),
-                    ),
-                  ),
-                );
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Scaffold(
+        appBar: AppBar(
+          automaticallyImplyLeading: false, // Removes the back arrow
+          title: Text(
+            'Support Chat',
+            style: TextStyle(color: Colors.black),
+          ),
+          backgroundColor: Colors.grey[200],
+          actions: [
+            IconButton(
+              icon: Icon(Icons.delete, color: Colors.red),
+              onPressed: () async {
+                await _deleteChatHistory();
+                setState(() {}); // Refresh the UI after deleting chat history
               },
             ),
-          ),
-          if (_isLoading)
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Center(
-                child: CircularProgressIndicator(),
+          ],
+        ),
+        body: Column(
+          children: [
+            Expanded(
+              child: StreamBuilder(
+                stream: _firestore
+                    .collection('chat_history')
+                    .doc(userId)
+                    .collection('messages')
+                    .orderBy('timestamp', descending: true)
+                    .snapshots(),
+                builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                  if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  }
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+
+                  final messages = snapshot.data!.docs;
+
+                  return ListView.builder(
+                    reverse: true,
+                    itemCount: messages.length,
+                    itemBuilder: (context, index) {
+                      final message =
+                          messages[index].data() as Map<String, dynamic>;
+                      final isUser = message['sender'] == 'user';
+
+                      return Align(
+                        alignment: isUser
+                            ? Alignment.centerRight
+                            : Alignment.centerLeft,
+                        child: Container(
+                          margin: EdgeInsets.symmetric(
+                              vertical: 5.0, horizontal: 10.0),
+                          padding: EdgeInsets.all(10.0),
+                          decoration: BoxDecoration(
+                            color: isUser ? Colors.red[400] : Colors.grey[300],
+                            borderRadius: BorderRadius.circular(15.0),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black26,
+                                blurRadius: 4.0,
+                                spreadRadius: 2.0,
+                              ),
+                            ],
+                          ),
+                          child: Text(
+                            message['text']!,
+                            style: TextStyle(
+                              color: isUser ? Colors.white : Colors.black54,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
               ),
             ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _controller,
-                    decoration: InputDecoration(
-                      hintText: 'Enter your message...',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30.0),
-                        borderSide: BorderSide.none,
+            if (_isLoading)
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _controller,
+                      decoration: InputDecoration(
+                        hintText: 'Enter your message...',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30.0),
+                          borderSide: BorderSide.none,
+                        ),
+                        filled: true,
+                        fillColor: Colors.grey[200],
+                        contentPadding: EdgeInsets.symmetric(
+                            vertical: 10.0, horizontal: 20.0),
                       ),
-                      filled: true,
-                      fillColor: Colors.grey[200],
                     ),
                   ),
-                ),
-                IconButton(
-                  icon: Icon(Icons.send),
-                  onPressed: _sendMessage,
-                  color: Colors.red,
-                ),
-              ],
+                  IconButton(
+                    icon: Icon(Icons.send, color: Colors.red[400]),
+                    onPressed: _sendMessage,
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
+        bottomNavigationBar: CustomNavigationBar(
+          selectedIndex: _selectedIndex,
+          onItemTapped: _onItemTapped,
+        ),
       ),
-      bottomNavigationBar: CustomNavigationBar(),
     );
   }
 }

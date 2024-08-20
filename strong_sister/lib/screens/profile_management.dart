@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../widgets/custom_navigation_bar.dart';
+import 'package:strong_sister/screens/home_page.dart';
+import 'package:strong_sister/screens/ai_chatbot.dart';
+import 'package:strong_sister/screens/safe_contacts.dart';
+import 'package:strong_sister/screens/community_screen.dart';
+import 'package:strong_sister/screens/camera_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   @override
@@ -9,11 +14,23 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  int _selectedIndex = 5;
+  final List<Widget> _screens = [
+    HomeScreen(),
+    SafeContactsScreen(),
+    CameraScreen(),
+    AIChatbotScreen(),
+    CommunityScreen(),
+    ProfileScreen(),
+  ];
+
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   String _userName = '';
   String _userEmail = '';
+
+  DateTime? lastPressed;
 
   @override
   void initState() {
@@ -25,7 +42,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       User? user = _auth.currentUser;
       if (user != null) {
-        DocumentSnapshot userDoc = await _firestore.collection('users').doc(user.uid).get();
+        DocumentSnapshot userDoc =
+            await _firestore.collection('users').doc(user.uid).get();
         if (userDoc.exists) {
           setState(() {
             _userName = userDoc['name'];
@@ -42,58 +60,90 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  Future<bool> _onWillPop() async {
+    final now = DateTime.now();
+    const backPressDuration = Duration(seconds: 2);
+
+    if (lastPressed == null ||
+        now.difference(lastPressed!) > backPressDuration) {
+      lastPressed = now;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Press back again to exit'),
+          duration: backPressDuration,
+        ),
+      );
+      return Future.value(false);
+    }
+    return Future.value(true);
+  }
+
+  void _onItemTapped(int index) {
+    if (index != _selectedIndex) {
+      setState(() {
+        _selectedIndex = index;
+      });
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => _screens[index]),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Profile'),
-        backgroundColor: Colors.teal,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context); 
-          },
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.edit),
-            onPressed: () {
-              // Handle edit profile action
-            },
-          ),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'User Name: $_userName',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 10),
-            Text(
-              'Email: $_userEmail',
-              style: TextStyle(fontSize: 16),
-            ),
-            SizedBox(height: 30),
-
-            Expanded(
-              child: ListView(
-                children: [
-                  _buildProfileAction(Icons.refresh, 'Available', 'Change Status'),
-                  _buildProfileAction(Icons.location_pin, 'Set Location', ''),
-                  _buildProfileAction(Icons.language, 'App Language', ''),
-                  _buildProfileAction(Icons.help, 'Help', ''),
-                  _buildProfileAction(Icons.logout, 'Logout', ''),
-                ],
-              ),
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Scaffold(
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          title: Text('Profile'),
+          backgroundColor: Colors.grey[200],
+          actions: [
+            IconButton(
+              icon: Icon(Icons.edit),
+              onPressed: () {
+                // Handle edit profile action
+              },
             ),
           ],
         ),
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '$_userName',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 10),
+              Text(
+                '$_userEmail',
+                style: TextStyle(fontSize: 16),
+              ),
+              SizedBox(height: 30),
+              Expanded(
+                child: ListView(
+                  children: [
+                    _buildProfileAction(
+                        Icons.refresh, 'Available', 'Change Status'),
+                    _buildProfileAction(Icons.location_pin, 'Set Location', ''),
+                    _buildProfileAction(Icons.language, 'App Language', ''),
+                    _buildProfileAction(Icons.help, 'Help', ''),
+                    _buildProfileAction(Icons.logout, 'Logout', ''),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        bottomNavigationBar: CustomNavigationBar(
+          selectedIndex: _selectedIndex,
+          onItemTapped: _onItemTapped,
+        ),
       ),
-      bottomNavigationBar: CustomNavigationBar(),
     );
   }
 
@@ -120,7 +170,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); 
+                Navigator.of(context).pop();
               },
               child: Text('Cancel'),
               style: TextButton.styleFrom(
@@ -129,7 +179,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); 
+                Navigator.of(context).pop();
                 _logout(context);
               },
               child: Text('Logout'),

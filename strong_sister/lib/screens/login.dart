@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -16,13 +17,18 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
       try {
-        await _auth.signInWithEmailAndPassword(
+        UserCredential userCredential = await _auth.signInWithEmailAndPassword(
           email: _emailController.text,
           password: _passwordController.text,
         );
 
-        // Navigate to the location screen after successful login
-        Navigator.pushReplacementNamed(context, '/location');
+        // Store user info in SharedPreferences
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('userId', userCredential.user?.uid ?? '');
+        await prefs.setString('userEmail', _emailController.text);
+
+        // Navigate to home screen after successful login
+        Navigator.pushReplacementNamed(context, '/home');
       } catch (e) {
         setState(() {
           _errorMessage = e.toString();
@@ -42,6 +48,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false, // Removes the back arrow
         backgroundColor: Colors.white,
         elevation: 0,
         iconTheme: IconThemeData(color: Colors.black),

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:strong_sister/screens/camera_screen.dart';
 
 class EmergencyActionScreen extends StatefulWidget {
   final String emergencyType;
@@ -12,6 +15,13 @@ class EmergencyActionScreen extends StatefulWidget {
 
 class _EmergencyActionScreenState extends State<EmergencyActionScreen> {
   String? _activeButton;
+  String? _safeContactNumber;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchSafeContact();
+  }
 
   // Function to call the nearest police station
   void _callPolice() async {
@@ -23,111 +33,132 @@ class _EmergencyActionScreenState extends State<EmergencyActionScreen> {
     }
   }
 
+  // Function to fetch the first safe contact
+  Future<void> _fetchSafeContact() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('safeContacts')
+          .limit(1)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        setState(() {
+          _safeContactNumber = snapshot.docs.first['contactNumber'];
+        });
+      }
+    }
+  }
+
+  // Function to call the first safe contact
+  void _callSafeContact() async {
+    if (_safeContactNumber != null) {
+      final phoneNumber = 'tel:$_safeContactNumber';
+      if (await canLaunch(phoneNumber)) {
+        await launch(phoneNumber);
+      } else {
+        throw 'Could not launch $phoneNumber';
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('No safe contact available')),
+      );
+    }
+  }
+
+  // Function to navigate to the CameraScreen
+  void _navigateToCamera() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => CameraScreen()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Emergency Actions for ${widget.emergencyType}'),
+        backgroundColor: Colors.grey[200],
+        title: Text(
+          'Emergency Actions for ${widget.emergencyType}',
+          style: TextStyle(color: Colors.black),
+        ),
+        iconTheme: IconThemeData(color: Colors.black),
       ),
-      body: Center(
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text(
               'What would you like to do next to report the incident? Please select the most suitable way for you, we will request for help for you.',
               textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16.0,
+                color: Colors.black,
+              ),
             ),
             SizedBox(height: 20),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _activeButton == 'CALL_POLICE'
-                    ? Colors.red
-                    : Colors.grey,
-                padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                textStyle: TextStyle(fontSize: 16),
-              ),
+            _buildActionButton(
+              label: 'CALL THE POLICE',
+              icon: Icons.phone,
+              isActive: _activeButton == 'CALL_POLICE',
               onPressed: () {
                 setState(() {
                   _activeButton = 'CALL_POLICE';
                 });
                 _callPolice();
               },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('CALL THE POLICE'),
-                  Icon(Icons.phone),
-                ],
-              ),
             ),
             SizedBox(height: 10),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _activeButton == 'SEEK_SHELTER'
-                    ? Colors.red
-                    : Colors.grey,
-                padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                textStyle: TextStyle(fontSize: 16),
-              ),
+            _buildActionButton(
+              label: 'CALL SAFE CONTACT',
+              icon: Icons.contact_phone,
+              isActive: _activeButton == 'CALL_SAFE_CONTACT',
+              onPressed: () {
+                setState(() {
+                  _activeButton = 'CALL_SAFE_CONTACT';
+                });
+                _callSafeContact();
+              },
+            ),
+            SizedBox(height: 10),
+            _buildActionButton(
+              label: 'SEEK NEARBY SHELTER',
+              icon: Icons.home_filled,
+              isActive: _activeButton == 'SEEK_SHELTER',
               onPressed: () {
                 setState(() {
                   _activeButton = 'SEEK_SHELTER';
                 });
                 // Implement your logic here
               },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('SEEK NEARBY SHELTER'),
-                  Icon(Icons.home_filled),
-                ],
-              ),
             ),
             SizedBox(height: 10),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _activeButton == 'RECORD_AUDIO'
-                    ? Colors.red
-                    : Colors.grey,
-                padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                textStyle: TextStyle(fontSize: 16),
-              ),
+            _buildActionButton(
+              label: 'RECORD AN AUDIO',
+              icon: Icons.mic,
+              isActive: _activeButton == 'RECORD_AUDIO',
               onPressed: () {
                 setState(() {
                   _activeButton = 'RECORD_AUDIO';
                 });
-                // Implement your logic here
+                _navigateToCamera(); // Navigate to camera screen
               },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('RECORD AN AUDIO'),
-                  Icon(Icons.mic),
-                ],
-              ),
             ),
             SizedBox(height: 10),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _activeButton == 'RECORD_VIDEO'
-                    ? Colors.red
-                    : Colors.grey,
-                padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                textStyle: TextStyle(fontSize: 16),
-              ),
+            _buildActionButton(
+              label: 'RECORD VIDEO/TAKE PHOTO',
+              icon: Icons.videocam,
+              isActive: _activeButton == 'RECORD_VIDEO',
               onPressed: () {
                 setState(() {
                   _activeButton = 'RECORD_VIDEO';
                 });
-                // Implement your logic here
+                _navigateToCamera(); // Navigate to camera screen
               },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('RECORD VIDEO/TAKE PHOTO'),
-                  Icon(Icons.videocam),
-                ],
-              ),
             ),
             SizedBox(height: 20),
             ElevatedButton(
@@ -143,6 +174,35 @@ class _EmergencyActionScreenState extends State<EmergencyActionScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildActionButton({
+    required String label,
+    required IconData icon,
+    required bool isActive,
+    required VoidCallback onPressed,
+  }) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: isActive ? Color(0xFFD50000) : Color(0xFFEF9A9A),
+        padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+        textStyle: TextStyle(fontSize: 16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.0),
+        ),
+      ),
+      onPressed: onPressed,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: TextStyle(color: Colors.white),
+          ),
+          Icon(icon, color: Colors.white),
+        ],
       ),
     );
   }

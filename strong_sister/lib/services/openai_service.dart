@@ -6,7 +6,7 @@ class OpenAIService {
   final String _apiKey = dotenv.env['OPENAI_API_KEY'] ?? '';
   Future<String> getChatbotResponse(String prompt) async {
     final url = Uri.parse('https://api.openai.com/v1/chat/completions');
-    
+
     final response = await http.post(
       url,
       headers: {
@@ -14,7 +14,7 @@ class OpenAIService {
         'Authorization': 'Bearer $_apiKey',
       },
       body: jsonEncode({
-        "model": "gpt-3.5-turbo",
+        "model": "gpt-4o-mini",
         "messages": [
           {"role": "system", "content": "You are a helpful assistant."},
           {"role": "user", "content": prompt},
