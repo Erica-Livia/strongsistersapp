@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
 import 'package:strong_sister/widgets/custom_navigation_bar.dart';
 import 'package:strong_sister/screens/ai_chatbot.dart';
 import 'package:strong_sister/screens/safe_contacts.dart';
@@ -15,6 +19,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   DateTime? lastPressed; // To track the last back button press time
+  String _location = "Fetching location..."; // Placeholder for location
   final List<Widget> _screens = [
     HomeScreen(),
     SafeContactsScreen(),
@@ -23,6 +28,12 @@ class _HomeScreenState extends State<HomeScreen> {
     CommunityScreen(),
     ProfileScreen(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _getCurrentLocation();
+  }
 
   void _onItemTapped(int index) {
     if (index != _selectedIndex) {
@@ -34,6 +45,73 @@ class _HomeScreenState extends State<HomeScreen> {
         context,
         MaterialPageRoute(builder: (context) => _screens[index]),
       );
+    }
+  }
+
+  Future<void> _getCurrentLocation() async {
+    try {
+      bool serviceEnabled;
+      LocationPermission permission;
+
+      serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        setState(() {
+          _location = "Location services are disabled.";
+        });
+        return;
+      }
+
+      permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          setState(() {
+            _location = "Location permissions are denied.";
+          });
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        setState(() {
+          _location = "Location permissions are permanently denied.";
+        });
+        return;
+      }
+
+      Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
+
+      _fetchAddressFromCoordinates(position.latitude, position.longitude);
+    } catch (e) {
+      print("Error in getting location: ${e.toString()}");
+      setState(() {
+        _location = "Failed to get location: ${e.toString()}";
+      });
+    }
+  }
+
+  Future<void> _fetchAddressFromCoordinates(double latitude, double longitude) async {
+    try {
+      String url = 'https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=$latitude&longitude=$longitude&localityLanguage=en';
+
+      http.Response response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        Map<String, dynamic> data = jsonDecode(response.body);
+
+        setState(() {
+          _location = "${data['city']}, ${data['principalSubdivision']}, ${data['countryName']}";
+        });
+      } else {
+        setState(() {
+          _location = "Failed to get location details.";
+        });
+      }
+    } catch (e) {
+      print("Error in fetching address: ${e.toString()}");
+      setState(() {
+        _location = "Failed to fetch address.";
+      });
     }
   }
 
@@ -75,7 +153,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Location: Kabuga, Kigali, Rwanda',
+                          _location,
                           style: TextStyle(
                             fontSize: 16.0,
                             fontWeight: FontWeight.bold,

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:strong_sister/models/contact.dart';
 import 'package:strong_sister/screens/home_page.dart';
@@ -10,7 +11,7 @@ import 'package:strong_sister/screens/community_screen.dart';
 import 'package:strong_sister/screens/profile_management.dart';
 import 'package:strong_sister/screens/camera_screen.dart';
 import '../widgets/custom_navigation_bar.dart';
-import '../widgets/buildContactList.dart';
+import 'dart:io';
 
 class SafeContactsScreen extends StatefulWidget {
   @override
@@ -27,30 +28,12 @@ class _SafeContactsScreenState extends State<SafeContactsScreen> {
     CommunityScreen(),
     ProfileScreen(),
   ];
-  Route createCustomRoute(Widget page) {
-    return PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) => page,
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        const begin = Offset(1.0, 0.0);
-        const end = Offset.zero;
-        const curve = Curves.easeInOut;
-
-        var tween =
-            Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-        var offsetAnimation = animation.drive(tween);
-
-        return SlideTransition(
-          position: offsetAnimation,
-          child: child,
-        );
-      },
-    );
-  }
 
   List<Contact> _contacts = [];
   Contact _newContact = Contact(id: '', name: '', phone: '', relationship: '');
   bool _isEditing = false;
   int _currentIndex = -1;
+  File? _selectedImage;
 
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
@@ -70,7 +53,6 @@ class _SafeContactsScreenState extends State<SafeContactsScreen> {
         _selectedIndex = index;
       });
 
-      // Instant transition to the selected screen
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => _screens[index]),
@@ -92,7 +74,6 @@ class _SafeContactsScreenState extends State<SafeContactsScreen> {
       _userId = user.uid;
       _loadContacts();
     } else {
-      // Redirect to login screen if user is not authenticated
       Navigator.pushReplacementNamed(context, '/auth-check');
     }
   }
@@ -111,6 +92,7 @@ class _SafeContactsScreenState extends State<SafeContactsScreen> {
           name: data['contactName'] ?? '',
           phone: data['contactNumber'] ?? '',
           relationship: data['relationship'] ?? '',
+          image: data['image'] ?? '',
         );
       }).toList();
       setState(() {
@@ -123,6 +105,11 @@ class _SafeContactsScreenState extends State<SafeContactsScreen> {
 
   Future<void> _addOrUpdateContact() async {
     try {
+      String? imageUrl;
+      if (_selectedImage != null) {
+        imageUrl = await _uploadImage(_selectedImage!);
+      }
+
       if (_isEditing) {
         await FirebaseFirestore.instance
             .collection('users')
@@ -133,6 +120,7 @@ class _SafeContactsScreenState extends State<SafeContactsScreen> {
           'contactName': _nameController.text,
           'contactNumber': _phoneController.text,
           'relationship': _relationshipController.text,
+          'image': imageUrl ?? _contacts[_currentIndex].image,
         });
         setState(() {
           _contacts[_currentIndex] = Contact(
@@ -140,9 +128,11 @@ class _SafeContactsScreenState extends State<SafeContactsScreen> {
             name: _nameController.text,
             phone: _phoneController.text,
             relationship: _relationshipController.text,
+            image: imageUrl ?? _contacts[_currentIndex].image,
           );
           _isEditing = false;
           _currentIndex = -1;
+          _selectedImage = null;
         });
       } else {
         final docRef = await FirebaseFirestore.instance
@@ -153,14 +143,17 @@ class _SafeContactsScreenState extends State<SafeContactsScreen> {
           'contactName': _nameController.text,
           'contactNumber': _phoneController.text,
           'relationship': _relationshipController.text,
+          'image': imageUrl,
         });
         setState(() {
           _contacts.add(Contact(
             id: docRef.id,
             name: _nameController.text,
-            phone: _phoneController.text,
+            phone: _nameController.text,
             relationship: _relationshipController.text,
+            image: imageUrl,
           ));
+          _selectedImage = null;
         });
       }
       print('Contact added/updated successfully');
@@ -170,12 +163,38 @@ class _SafeContactsScreenState extends State<SafeContactsScreen> {
     }
   }
 
+  Future<String?> _uploadImage(File image) async {
+    try {
+      final storageRef = FirebaseStorage.instance
+          .ref()
+          .child('user_images')
+          .child('$_userId/${DateTime.now().millisecondsSinceEpoch}.jpg');
+
+      await storageRef.putFile(image);
+      return await storageRef.getDownloadURL();
+    } catch (e) {
+      print('Error uploading image: $e');
+      return null;
+    }
+  }
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedImage = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedImage != null) {
+      setState(() {
+        _selectedImage = File(pickedImage.path);
+      });
+    }
+  }
+
   void _showContactModal() {
     if (!_isEditing) {
       _newContact = Contact(id: '', name: '', phone: '', relationship: '');
       _nameController.clear();
       _phoneController.clear();
       _relationshipController.clear();
+      _selectedImage = null;
     }
     showDialog(
       context: context,
@@ -187,6 +206,24 @@ class _SafeContactsScreenState extends State<SafeContactsScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                GestureDetector(
+                  onTap: _pickImage,
+                  child: CircleAvatar(
+                    radius: 40,
+                    backgroundImage: _selectedImage != null
+                        ? FileImage(_selectedImage!)
+                        : _isEditing && _newContact.image?.isNotEmpty == true
+                            ? NetworkImage(_newContact.image!)
+                            : null,
+                    child: _selectedImage == null
+                        ? Icon(
+                            Icons.camera_alt,
+                            size: 40,
+                          )
+                        : null,
+                  ),
+                ),
+                SizedBox(height: 16),
                 TextField(
                   controller: _nameController,
                   decoration: InputDecoration(
@@ -248,6 +285,7 @@ class _SafeContactsScreenState extends State<SafeContactsScreen> {
     _nameController.text = _contacts[index].name;
     _phoneController.text = _contacts[index].phone;
     _relationshipController.text = _contacts[index].relationship;
+    _selectedImage = null; // Reset image selection for editing
     _showContactModal();
   }
 
@@ -324,8 +362,9 @@ class _SafeContactsScreenState extends State<SafeContactsScreen> {
         return ListTile(
           contentPadding: EdgeInsets.all(12),
           leading: CircleAvatar(
-            backgroundImage:
-                NetworkImage(contact.image ?? 'https://via.placeholder.com/50'),
+            backgroundImage: contact.image != null && contact.image!.isNotEmpty
+                ? NetworkImage(contact.image!)
+                : AssetImage('assets/images/default_avatar.png') as ImageProvider,
             radius: 30,
           ),
           title: Text(
@@ -343,7 +382,7 @@ class _SafeContactsScreenState extends State<SafeContactsScreen> {
                 color: Colors.green,
               ),
               IconButton(
-                icon: SvgPicture.asset('assets/edit.svg'),
+                icon: Icon(Icons.edit),
                 onPressed: () => _handleEditContact(index),
                 color: Colors.teal,
               ),

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import '../widgets/custom_navigation_bar.dart';
 import 'package:strong_sister/screens/home_page.dart';
 import 'package:strong_sister/screens/ai_chatbot.dart';
@@ -29,7 +32,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   String _userName = '';
   String _userEmail = '';
-
+  String _userLocation = 'Set Location';
+  
   DateTime? lastPressed;
 
   @override
@@ -48,6 +52,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           setState(() {
             _userName = userDoc['name'];
             _userEmail = userDoc['email'];
+            _userLocation = userDoc['location'] ?? 'Set Location';
           });
         } else {
           print('User document does not exist');
@@ -57,6 +62,46 @@ class _ProfileScreenState extends State<ProfileScreen> {
       }
     } catch (e) {
       print('Error fetching user data: $e');
+    }
+  }
+
+  Future<void> _updateUserLocation(String newLocation) async {
+    try {
+      User? user = _auth.currentUser;
+      if (user != null) {
+        await _firestore.collection('users').doc(user.uid).update({
+          'location': newLocation,
+        });
+        setState(() {
+          _userLocation = newLocation;
+        });
+      } else {
+        print('No user is currently signed in');
+      }
+    } catch (e) {
+      print('Error updating user location: $e');
+    }
+  }
+
+  Future<void> _setUserLocation() async {
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
+
+      String url =
+          'https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${position.latitude}&longitude=${position.longitude}&localityLanguage=en';
+
+      http.Response response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        Map<String, dynamic> data = jsonDecode(response.body);
+        String newLocation =
+            "${data['city']}, ${data['principalSubdivision']}, ${data['countryName']}";
+        _updateUserLocation(newLocation);
+      } else {
+        print("Failed to fetch location from API");
+      }
+    } catch (e) {
+      print('Error setting user location: $e');
     }
   }
 
@@ -129,7 +174,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   children: [
                     _buildProfileAction(
                         Icons.refresh, 'Available', 'Change Status'),
-                    _buildProfileAction(Icons.location_pin, 'Set Location', ''),
+                    _buildProfileAction(Icons.location_pin, _userLocation, 'Set Location'),
                     _buildProfileAction(Icons.language, 'App Language', ''),
                     _buildProfileAction(Icons.help, 'Help', ''),
                     _buildProfileAction(Icons.logout, 'Logout', ''),
@@ -153,7 +198,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       title: Text(title),
       subtitle: subtitle.isNotEmpty ? Text(subtitle) : null,
       onTap: () {
-        if (title == 'Logout') {
+        if (title == _userLocation) {
+          _setUserLocation();
+        } else if (title == 'Logout') {
           _showLogoutWarning(context);
         }
       },
