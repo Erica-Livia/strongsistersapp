@@ -18,8 +18,9 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
-  DateTime? lastPressed; // To track the last back button press time
-  String _location = "Fetching location..."; // Placeholder for location
+  DateTime? lastPressed;
+  String _location = "Fetching location...";
+
   final List<Widget> _screens = [
     HomeScreen(),
     SafeContactsScreen(),
@@ -91,16 +92,19 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Future<void> _fetchAddressFromCoordinates(double latitude, double longitude) async {
+  Future<void> _fetchAddressFromCoordinates(
+      double latitude, double longitude) async {
     try {
-      String url = 'https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=$latitude&longitude=$longitude&localityLanguage=en';
+      String url =
+          'https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=$latitude&longitude=$longitude&localityLanguage=en';
 
       http.Response response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
         Map<String, dynamic> data = jsonDecode(response.body);
 
         setState(() {
-          _location = "${data['city']}, ${data['principalSubdivision']}, ${data['countryName']}";
+          _location =
+              "${data['city']}, ${data['principalSubdivision']}, ${data['countryName']}";
         });
       } else {
         setState(() {
@@ -142,12 +146,16 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             children: [
               SizedBox(height: 20.0),
+              // Location Section
               Container(
                 padding: EdgeInsets.all(16.0),
-                height: MediaQuery.of(context).size.height * 0.33,
-                color: Color(0xFFF5F5FA),
+                decoration: BoxDecoration(
+                  color: Color(0xFFF5F5FA),
+                  borderRadius: BorderRadius.vertical(
+                    bottom: Radius.circular(20.0),
+                  ),
+                ),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -155,10 +163,19 @@ class _HomeScreenState extends State<HomeScreen> {
                         Text(
                           _location,
                           style: TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
+                            fontSize: 14.0,
+                            color: Colors.black54,
                           ),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.camera_alt, color: Colors.black54),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => CameraScreen()),
+                            );
+                          },
                         ),
                       ],
                     ),
@@ -166,7 +183,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     Row(
                       children: [
                         Expanded(
-                          flex: 2,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -180,9 +196,9 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                               SizedBox(height: 8.0),
                               Text(
-                                "Shake your phone or click the emergency button, your live location will be shared with the nearest help center and your emergency contacts.",
+                                "Press shake your phone, your live location will be shared with the nearest help center and your emergency contacts.",
                                 style: TextStyle(
-                                  color: Colors.black,
+                                  color: Colors.black54,
                                 ),
                               ),
                             ],
@@ -190,11 +206,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         SizedBox(width: 16.0),
                         Expanded(
-                          flex: 1,
                           child: Image.asset(
-                            'assets/emergency_image.jpg',
-                            height: 120.0,
-                            width: 120.0,
+                            'assets/emergency_image.png',
+                            height: 180.0,
                           ),
                         ),
                       ],
@@ -202,96 +216,18 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
               ),
-              Container(
-                height: MediaQuery.of(context).size.height * 0.25,
-                color: Colors.white,
-                child: Center(
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      _buildRadarCircle(210.0),
-                      _buildRadarCircle(180.0),
-                      _buildRadarCircle(140.0),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => EmergencyActionScreen(
-                                emergencyType: 'General Emergency',
-                              ),
-                            ),
-                          );
-                        },
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            Container(
-                              height: 120.0,
-                              width: 120.0,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Color(0xFFEF5350),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Color(0xFFEF5350),
-                                    blurRadius: 4.0,
-                                    spreadRadius: 2.0,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Container(
-                              height: 100.0,
-                              width: 100.0,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Color(0xFFD50000),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Color(0xFFD50000),
-                                    blurRadius: 4.0,
-                                    spreadRadius: 3.0,
-                                  ),
-                                ],
-                              ),
-                              child: Center(
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      Icons.phone_android,
-                                      size: 40.0,
-                                      color: Colors.white,
-                                    ),
-                                    SizedBox(height: 8.0),
-                                    Text(
-                                      'SOS Button',
-                                      style: TextStyle(
-                                        fontSize: 14.0,
-                                        color: Colors.white,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Container(
-                padding: EdgeInsets.all(16.0),
-                color: Color(0xFFF5F5FA),
+              SizedBox(height: 20),
+              // SOS Button Section
+              SOSButton(),
+              SizedBox(height: 20),
+              // Emergency Type Section
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'What is your emergency?',
+                      "What's your emergency?",
                       style: TextStyle(
                         fontSize: 16.0,
                         fontWeight: FontWeight.bold,
@@ -304,12 +240,13 @@ class _HomeScreenState extends State<HomeScreen> {
                       shrinkWrap: true,
                       crossAxisSpacing: 16.0,
                       mainAxisSpacing: 16.0,
-                      childAspectRatio: 2,
+                      childAspectRatio: 3,
                       physics: NeverScrollableScrollPhysics(),
                       children: [
                         _buildEmergencyButton(
                           icon: Icons.report,
                           label: 'Violence',
+                          color: Color(0xFFEF5350),
                           onPressed: () {
                             Navigator.push(
                               context,
@@ -322,22 +259,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           },
                         ),
                         _buildEmergencyButton(
-                          icon: Icons.warning_amber_rounded,
-                          label: 'Other',
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => EmergencyActionScreen(
-                                  emergencyType: 'Other',
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                        _buildEmergencyButton(
-                          icon: Icons.health_and_safety,
+                          icon: Icons.local_hospital,
                           label: 'Medical',
+                          color: Color(0xFFF5CBA7),
                           onPressed: () {
                             Navigator.push(
                               context,
@@ -352,12 +276,28 @@ class _HomeScreenState extends State<HomeScreen> {
                         _buildEmergencyButton(
                           icon: Icons.car_crash,
                           label: 'Accident',
+                          color: Color(0xFFD7CCC8),
                           onPressed: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (context) => EmergencyActionScreen(
                                   emergencyType: 'Accident',
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                        _buildEmergencyButton(
+                          icon: Icons.warning_amber_rounded,
+                          label: 'Other',
+                          color: Color(0xFFEF9A9A),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => EmergencyActionScreen(
+                                  emergencyType: 'Other',
                                 ),
                               ),
                             );
@@ -385,18 +325,14 @@ class _HomeScreenState extends State<HomeScreen> {
       width: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: Color(0xFFEF9A9A),
+        color: Color(0xFFF1F1F1),
         boxShadow: [
           BoxShadow(
-            color: Color(0xFFEF9A9A),
-            blurRadius: 2.0,
-            spreadRadius: 1.0,
+            color: Colors.grey.withOpacity(0.5),
+            blurRadius: 10.0,
+            spreadRadius: 2.0,
           ),
         ],
-        border: Border.all(
-          color: Color.fromARGB(176, 239, 154, 154),
-          width: 2.0,
-        ),
       ),
     );
   }
@@ -405,33 +341,96 @@ class _HomeScreenState extends State<HomeScreen> {
     required IconData icon,
     required String label,
     required VoidCallback onPressed,
+    required Color color,
   }) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        padding: EdgeInsets.all(14.0),
-        backgroundColor: Color(0xFFEF9A9A),
+        padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+        backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20.0),
+          side: BorderSide(color: color, width: 2.0),
         ),
       ),
       onPressed: onPressed,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+      child: Row(
         children: [
-          Icon(
-            icon,
-            size: 40.0,
-            color: Color(0xFFC62828),
+          CircleAvatar(
+            backgroundColor: color,
+            child: Icon(icon, color: Colors.white),
           ),
-          SizedBox(height: 8.0),
+          SizedBox(width: 12.0),
           Text(
             label,
             style: TextStyle(
-              color: Colors.white,
+              color: Colors.black,
               fontWeight: FontWeight.bold,
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class SOSButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => EmergencyActionScreen(
+                emergencyType: 'General Emergency',
+              ),
+            ),
+          );
+        },
+        child: Container(
+          width: 200,
+          height: 200,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: RadialGradient(
+              colors: [Color(0xFFFF6B6B), Color(0xFFD50000)],
+              center: Alignment.center,
+              radius: 1.0,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.5),
+                spreadRadius: 4,
+                blurRadius: 8,
+                offset: Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'SOS',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  'Press for 3 seconds',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
