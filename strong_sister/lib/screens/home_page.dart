@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:shake/shake.dart'; // Import the shake package
+import 'package:url_launcher/url_launcher.dart'; // Import url_launcher for making calls
 
 import 'package:strong_sister/widgets/custom_navigation_bar.dart';
 import 'package:strong_sister/screens/ai_chatbot.dart';
@@ -20,6 +22,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   DateTime? lastPressed;
   String _location = "Fetching location...";
+  ShakeDetector? shakeDetector; // Declare the ShakeDetector
 
   final List<Widget> _screens = [
     HomeScreen(),
@@ -34,6 +37,27 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _getCurrentLocation();
+    // Initialize the shake detector
+    shakeDetector = ShakeDetector.autoStart(
+      onPhoneShake: () {
+        _callSafeContact();
+      },
+    );
+  }
+
+  void _callSafeContact() {
+    final Uri launchUri = Uri(
+      scheme: 'tel',
+      path: '1234567890', // Replace with your safe contact number
+    );
+    launchUrl(launchUri);
+  }
+
+  @override
+  void dispose() {
+    // Dispose of the shake detector
+    shakeDetector?.stopListening();
+    super.dispose();
   }
 
   void _onItemTapped(int index) {
