@@ -47,3 +47,5 @@ app.*.map.json
 
 # API INFO
 .env
+
+myenv/
