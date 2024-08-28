@@ -46,6 +46,7 @@ dependencies:
   geocoding: ^2.0.0
   image_picker: ^0.8.4+3
   shake: ^1.0.1
+  sensors: ^2.0.3
   
 
   url_launcher: ^6.0.0

@@ -5,11 +5,12 @@ import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../widgets/custom_navigation_bar.dart';
-import 'package:strong_sister/screens/home_page.dart';
-import 'package:strong_sister/screens/ai_chatbot.dart';
-import 'package:strong_sister/screens/safe_contacts.dart';
-import 'package:strong_sister/screens/community_screen.dart';
-import 'package:strong_sister/screens/camera_screen.dart';
+import 'home_page.dart';
+import 'ai_chatbot.dart';
+import 'safe_contacts.dart';
+import 'community_screen.dart';
+import 'camera_screen.dart';
+import 'reports_screen.dart';  // Add this import
 
 class ProfileScreen extends StatefulWidget {
   @override
@@ -178,6 +179,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     _buildProfileAction(Icons.language, 'App Language', ''),
                     _buildProfileAction(Icons.help, 'Help', ''),
                     _buildProfileAction(Icons.logout, 'Logout', ''),
+                    ListTile(
+                      leading: Icon(Icons.report),
+                      title: Text('My Reports'),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => ReportsScreen()),
+                        );
+                      },
+                    ),
                   ],
                 ),
               ),
