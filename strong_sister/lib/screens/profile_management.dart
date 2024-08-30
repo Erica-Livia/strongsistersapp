@@ -10,7 +10,7 @@ import 'ai_chatbot.dart';
 import 'safe_contacts.dart';
 import 'community_screen.dart';
 import 'camera_screen.dart';
-import 'reports_screen.dart';  // Add this import
+import 'reports_screen.dart';  
 
 class ProfileScreen extends StatefulWidget {
   @override
