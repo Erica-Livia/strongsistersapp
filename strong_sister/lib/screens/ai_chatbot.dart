@@ -229,8 +229,11 @@ class _AIChatbotScreenState extends State<AIChatbotScreen> {
             if (_isLoading)
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Center(
-                  child: CircularProgressIndicator(),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _buildTypingIndicator(),
+                  ],
                 ),
               ),
             Padding(
@@ -265,6 +268,33 @@ class _AIChatbotScreenState extends State<AIChatbotScreen> {
         bottomNavigationBar: CustomNavigationBar(
           selectedIndex: _selectedIndex,
           onItemTapped: _onItemTapped,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTypingIndicator() {
+    return Row(
+      children: [
+        _buildDot(),
+        SizedBox(width: 5),
+        _buildDot(),
+        SizedBox(width: 5),
+        _buildDot(),
+      ],
+    );
+  }
+
+  Widget _buildDot() {
+    return AnimatedOpacity(
+      opacity: _isLoading ? 1.0 : 0.0,
+      duration: Duration(milliseconds: 300),
+      child: Container(
+        width: 8.0,
+        height: 8.0,
+        decoration: BoxDecoration(
+          color: Colors.grey[600],
+          shape: BoxShape.circle,
         ),
       ),
     );

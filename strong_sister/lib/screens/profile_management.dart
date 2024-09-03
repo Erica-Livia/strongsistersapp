@@ -3,13 +3,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
 import 'dart:convert';
 import '../widgets/custom_navigation_bar.dart';
-import 'package:strong_sister/screens/home_page.dart';
-import 'package:strong_sister/screens/ai_chatbot.dart';
-import 'package:strong_sister/screens/safe_contacts.dart';
-import 'package:strong_sister/screens/community_screen.dart';
-import 'package:strong_sister/screens/camera_screen.dart';
+import 'home_page.dart';
+import 'ai_chatbot.dart';
+import 'safe_contacts.dart';
+import 'community_screen.dart';
+import 'camera_screen.dart';
+import 'reports_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   @override
@@ -33,7 +35,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String _userName = '';
   String _userEmail = '';
   String _userLocation = 'Set Location';
-  
+
   DateTime? lastPressed;
 
   @override
@@ -157,27 +159,90 @@ class _ProfileScreenState extends State<ProfileScreen> {
         body: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(
-                '$_userName',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              // Center the user info
+              Center(
+                child: Column(
+                  children: [
+                    Text(
+                      '$_userName',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      '$_userEmail',
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Colors.black54,
+                      ),
+                    ),
+                    SizedBox(height: 30),
+                  ],
+                ),
               ),
-              SizedBox(height: 10),
-              Text(
-                '$_userEmail',
-                style: TextStyle(fontSize: 16),
-              ),
-              SizedBox(height: 30),
               Expanded(
                 child: ListView(
                   children: [
                     _buildProfileAction(
-                        Icons.refresh, 'Available', 'Change Status'),
-                    _buildProfileAction(Icons.location_pin, _userLocation, 'Set Location'),
+                        Icons.location_pin, _userLocation, 'Set Location'),
                     _buildProfileAction(Icons.language, 'App Language', ''),
-                    _buildProfileAction(Icons.help, 'Help', ''),
-                    _buildProfileAction(Icons.logout, 'Logout', ''),
+                    ListTile(
+                      leading: Icon(Icons.report),
+                      title: Text('My Reports'),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ReportsScreen()),
+                        );
+                      },
+                    ),
+                    ListTile(
+                      leading: Icon(Icons.help),
+                      title: Text('Help'),
+                      onTap: () async {
+                        final url =
+                            Uri.parse('https://strong-sister.vercel.app/');
+                        if (await canLaunchUrl(url)) {
+                          await launchUrl(url,
+                              mode: LaunchMode.externalApplication);
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content: Text('Could not launch help URL')),
+                          );
+                        }
+                      },
+                    ),
+                    ListTile(
+                      leading: Icon(Icons.update),
+                      title: Text('Update the app'),
+                      onTap: () async {
+                        final url =
+                            Uri.parse('https://new-version-ecru.vercel.app/');
+                        if (await canLaunchUrl(url)) {
+                          await launchUrl(url,
+                              mode: LaunchMode.externalApplication);
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content: Text('Could not launch update URL')),
+                          );
+                        }
+                      },
+                    ),
+                    ListTile(
+                      leading: Icon(Icons.logout, color: Colors.red),
+                      title: Text('Logout'),
+                      onTap: () {
+                        _showLogoutWarning(context);
+                      },
+                    ),
                   ],
                 ),
               ),
@@ -243,5 +308,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void _logout(BuildContext context) {
     _auth.signOut();
     Navigator.of(context).pushReplacementNamed('/');
+  }
+
+  void _launchURL(String url) async {
+    final Uri uri = Uri.parse(url);
+    try {
+      bool canLaunch = await canLaunchUrl(uri);
+      if (!canLaunch) {
+        throw 'Could not launch $url';
+      }
+
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (e) {
+      print('Error launching URL: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to open link: $e'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
   }
 }

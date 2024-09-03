@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:strong_sister/screens/emergency_action_screen.dart';
-import 'package:strong_sister/services/openai_service.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:strong_sister/firebase_options.dart';
 import 'package:strong_sister/screens/login.dart';
 import 'package:strong_sister/screens/register.dart';
@@ -16,7 +13,7 @@ import 'package:strong_sister/screens/community_screen.dart';
 import 'package:strong_sister/screens/profile_management.dart';
 import 'package:strong_sister/screens/camera_screen.dart';
 import 'package:strong_sister/screens/auth_check_screen.dart';
-import 'package:strong_sister/screens/emergency_action_screen.dart';
+import 'package:strong_sister/services/openai_service.dart';
 
 void main() async {
   dotenv.load(fileName: "../.env");
@@ -52,10 +49,9 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      initialRoute: '/',
+      home: AuthCheckScreen(),
       routes: {
         '/auth-check': (context) => AuthCheckScreen(),
-        '/': (context) => LoginScreen(),
         '/register': (context) => RegisterScreen(),
         '/home': (context) => HomeScreen(),
         '/contacts': (context) => SafeContactsScreen(),
@@ -63,6 +59,26 @@ class MyApp extends StatelessWidget {
         '/community': (context) => CommunityScreen(),
         '/profile': (context) => ProfileScreen(),
         '/camera': (context) => CameraScreen(),
+      },
+    );
+  }
+}
+
+class AuthCheckScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        } else if (snapshot.hasData) {
+          return HomeScreen();
+        } else {
+          return LoginScreen();
+        }
       },
     );
   }
