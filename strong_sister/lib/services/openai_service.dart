@@ -6,8 +6,7 @@ import 'chatbot_service.dart';
 class OpenAIService {
   final String _apiKey = dotenv.env['OPENAI_API_KEY'] ?? '';
   final ChatbotService _chatbotService = ChatbotService();
-  final String openAiModel =
-      'gpt-4o-mini';
+  final String openAiModel = 'gpt-4o-mini';
 
   Future<String> getChatbotResponse(String prompt) async {
     print('Received prompt: $prompt'); // Debugging line
