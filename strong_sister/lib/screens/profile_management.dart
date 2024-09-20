@@ -206,34 +206,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       leading: Icon(Icons.help),
                       title: Text('Help'),
                       onTap: () async {
-                        final url =
-                            Uri.parse('https://strong-sister.vercel.app/');
-                        if (await canLaunchUrl(url)) {
-                          await launchUrl(url,
-                              mode: LaunchMode.externalApplication);
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                                content: Text('Could not launch help URL')),
-                          );
-                        }
+                        _launchUrl('https://strong-sister.vercel.app/');
                       },
                     ),
                     ListTile(
                       leading: Icon(Icons.update),
                       title: Text('Update the app'),
                       onTap: () async {
-                        final url =
-                            Uri.parse('https://new-version-ecru.vercel.app/');
-                        if (await canLaunchUrl(url)) {
-                          await launchUrl(url,
-                              mode: LaunchMode.externalApplication);
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                                content: Text('Could not launch update URL')),
-                          );
-                        }
+                        _launchUrl('https://new-version-ecru.vercel.app/');
                       },
                     ),
                     ListTile(
@@ -310,22 +290,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     Navigator.of(context).pushReplacementNamed('/');
   }
 
-  void _launchURL(String url) async {
+  Future<void> _launchUrl(String url) async {
     final Uri uri = Uri.parse(url);
-    try {
-      bool canLaunch = await canLaunchUrl(uri);
-      if (!canLaunch) {
-        throw 'Could not launch $url';
-      }
-
+    if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } catch (e) {
-      print('Error launching URL: $e');
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to open link: $e'),
-          duration: Duration(seconds: 2),
-        ),
+        SnackBar(content: Text('Could not launch $url')),
       );
     }
   }

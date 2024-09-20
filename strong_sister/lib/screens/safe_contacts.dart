@@ -70,12 +70,6 @@ class _SafeContactsScreenState extends State<SafeContactsScreen> {
 
   Future<void> _authenticateAndLoadContacts() async {
     User? user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      _userId = user.uid;
-      _loadContacts();
-    } else {
-      Navigator.pushReplacementNamed(context, '/auth-check');
-    }
   }
 
   Future<void> _loadContacts() async {
@@ -364,7 +358,8 @@ class _SafeContactsScreenState extends State<SafeContactsScreen> {
           leading: CircleAvatar(
             backgroundImage: contact.image != null && contact.image!.isNotEmpty
                 ? NetworkImage(contact.image!)
-                : AssetImage('assets/images/default_avatar.png') as ImageProvider,
+                : AssetImage('assets/images/default_avatar.png')
+                    as ImageProvider,
             radius: 30,
           ),
           title: Text(

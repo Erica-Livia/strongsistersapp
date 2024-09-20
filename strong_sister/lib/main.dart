@@ -13,11 +13,16 @@ import 'package:strong_sister/screens/community_screen.dart';
 import 'package:strong_sister/screens/profile_management.dart';
 import 'package:strong_sister/screens/camera_screen.dart';
 import 'package:strong_sister/screens/auth_check_screen.dart';
+import 'package:strong_sister/screens/voice_test_screen.dart';
 import 'package:strong_sister/services/openai_service.dart';
+import 'package:strong_sister/services/voice_recognition_service.dart';
+import 'package:flutter_background_service/flutter_background_service.dart';
+import 'package:flutter_background_service_android/flutter_background_service_android.dart';
 
 void main() async {
   dotenv.load(fileName: "../.env");
   WidgetsFlutterBinding.ensureInitialized();
+
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
@@ -28,6 +33,10 @@ void main() async {
     print("Error initializing Firebase: $e");
     print("Stack trace: $stackTrace");
   }
+
+  // Initialize the background service
+  await initializeBackgroundService();
+
   runApp(
     MultiProvider(
       providers: [
@@ -40,6 +49,62 @@ void main() async {
   );
 }
 
+// Initialize the background service for voice recognition
+Future<void> initializeBackgroundService() async {
+  final service = FlutterBackgroundService();
+
+  await service.configure(
+    androidConfiguration: AndroidConfiguration(
+      onStart: onStartService,
+      isForegroundMode: true,
+      autoStart: true,
+    ),
+    iosConfiguration: IosConfiguration(
+      autoStart: true,
+      onForeground: onStartService,
+      onBackground: (service) {
+        return true;
+      },
+    ),
+  );
+
+  service.startService(); // Corrected the start method for the service
+}
+
+extension on FlutterBackgroundService {
+  void startService() {}
+
+  on(String s) {}
+
+  void stopSelf() {}
+
+  void setAsForegroundService() {}
+
+  void setForegroundNotificationInfo(
+      {required String title, required String content}) {}
+}
+
+// Background service handler for voice recognition
+void onStartService(FlutterBackgroundService service) async {
+  VoiceRecognitionService _voiceRecognitionService = VoiceRecognitionService();
+  _voiceRecognitionService.startListening();
+
+  service.on('stopService').listen((event) {
+    service.stopSelf();
+  });
+
+  // Implement notification for Android (assuming the app runs on Android)
+  if (service is AndroidServiceInstance) {
+    service.setAsForegroundService();
+    service.setForegroundNotificationInfo(
+      title: "Voice Recognition Active",
+      content: "Listening for the word 'help'...",
+    );
+  }
+}
+
+class AndroidServiceInstance {}
+
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -49,7 +114,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: AuthCheckScreen(),
+      home: HomeScreen(),
       routes: {
         '/auth-check': (context) => AuthCheckScreen(),
         '/register': (context) => RegisterScreen(),
@@ -59,11 +124,13 @@ class MyApp extends StatelessWidget {
         '/community': (context) => CommunityScreen(),
         '/profile': (context) => ProfileScreen(),
         '/camera': (context) => CameraScreen(),
+        '/voice-test': (context) => TestVoiceRecognitionScreen(),
       },
     );
   }
 }
 
+// Authentication check screen
 class AuthCheckScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -75,9 +142,9 @@ class AuthCheckScreen extends StatelessWidget {
             body: Center(child: CircularProgressIndicator()),
           );
         } else if (snapshot.hasData) {
-          return HomeScreen();
+          return HomeScreen(); // User is authenticated
         } else {
-          return LoginScreen();
+          return LoginScreen(); // User is not authenticated
         }
       },
     );

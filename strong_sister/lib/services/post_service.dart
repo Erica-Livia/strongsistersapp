@@ -12,8 +12,7 @@ class PostService {
       'imageUrl': imageUrl,
       'userId': userId,
       'timestamp': FieldValue.serverTimestamp(),
-      'likes': 0,
-      'comments': 0,
+      'comments': 0, // Comment count
     });
   }
 
@@ -36,22 +35,25 @@ class PostService {
     final userLikeRef = postRef.collection('likes').doc(userId);
 
     await FirebaseFirestore.instance.runTransaction((transaction) async {
-      final postSnapshot = await transaction.get(postRef);
       final userLikeSnapshot = await transaction.get(userLikeRef);
 
-      if (postSnapshot.exists) {
-        if (userLikeSnapshot.exists) {
-          // User has already liked the post, remove the like
-          transaction.update(postRef, {'likes': FieldValue.increment(-1)});
-          transaction.delete(userLikeRef);
-        } else {
-          // User has not liked the post, add the like
-          transaction.update(postRef, {'likes': FieldValue.increment(1)});
-          transaction
-              .set(userLikeRef, {'timestamp': FieldValue.serverTimestamp()});
-        }
+      if (userLikeSnapshot.exists) {
+        // User has already liked the post, remove the like
+        transaction.delete(userLikeRef);
+      } else {
+        // User has not liked the post, add the like
+        transaction.set(userLikeRef, {
+          'timestamp': FieldValue.serverTimestamp(),
+        });
       }
     });
+  }
+
+  // Get the total number of likes for a post
+  Future<int> getLikesCount(String postId) async {
+    final postRef = postsCollection.doc(postId);
+    final likesSnapshot = await postRef.collection('likes').get();
+    return likesSnapshot.size; // Return the number of documents (likes)
   }
 
   // Check if the user has liked a post
@@ -59,7 +61,8 @@ class PostService {
     final userLikeRef =
         postsCollection.doc(postId).collection('likes').doc(userId);
     final userLikeSnapshot = await userLikeRef.get();
-    return userLikeSnapshot.exists;
+    return userLikeSnapshot
+        .exists; // Return true if the user has liked the post
   }
 
   // Add a comment to a post
@@ -101,7 +104,7 @@ class PostService {
     });
   }
 
-  // Delete a post
+  // Delete a post and associated likes/comments
   Future<void> deletePost(String postId) async {
     final postRef = postsCollection.doc(postId);
 
