@@ -196,7 +196,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                               SizedBox(height: 8.0),
                               Text(
-                                "Press shake your phone, your live location will be shared with the nearest help center and your emergency contacts.",
+                                "Press the SOS button, to take action about your emergency and notify your safe contacts.",
                                 style: TextStyle(
                                   color: Colors.black54,
                                 ),

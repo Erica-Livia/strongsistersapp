@@ -70,6 +70,12 @@ class _SafeContactsScreenState extends State<SafeContactsScreen> {
 
   Future<void> _authenticateAndLoadContacts() async {
     User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      _userId = user.uid;
+      _loadContacts();
+    } else {
+      Navigator.pushReplacementNamed(context, '/auth-check');
+    }
   }
 
   Future<void> _loadContacts() async {

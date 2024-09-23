@@ -114,7 +114,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: HomeScreen(),
+      home: AuthCheckScreen(),
       routes: {
         '/auth-check': (context) => AuthCheckScreen(),
         '/register': (context) => RegisterScreen(),
